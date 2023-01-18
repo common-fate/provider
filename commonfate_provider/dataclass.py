@@ -2,6 +2,7 @@ import abc
 from typing_extensions import dataclass_transform
 from dataclasses import dataclass
 
+
 @dataclass_transform()
 class ModelMeta(type):
     def __init_subclass__(

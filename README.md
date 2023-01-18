@@ -1,2 +1,2 @@
 # commonfate-provider-core
-Commonfate Provider Core Python Package 
+Commonfate Provider Core Python Package

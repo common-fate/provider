@@ -6,7 +6,7 @@ authors = ["Chris Norman <chris@commonfate.io>", "Manish Chaulagain <manish@comm
 readme = "README.md"
 packages = [{include = "commonfate_provider"}]
 include = ["commonfate_provider/**/*.py"]
-## TODO: Not excluding test from the build 
+## TODO: Not excluding test from the build
 exclude = ["commonfate_provider/tests/**"]
 
 [tool.poetry.dependencies]
@@ -17,6 +17,9 @@ pytest = "7.2.0"
 typing-extensions = "4.4.0"
 pydantic = "1.10.2"
 treelib = "1.6.1"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^2.21.0"
 
 [build-system]
 requires = ["poetry-core"]

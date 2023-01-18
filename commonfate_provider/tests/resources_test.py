@@ -17,7 +17,7 @@ class SecondResource(resources.Resource):
 
 
 @resources.fetcher
-def load_resources(p):
+def load_resources():
     pass
 
 
