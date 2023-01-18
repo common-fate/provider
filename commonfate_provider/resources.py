@@ -130,6 +130,3 @@ class JSONStorage:
 
 
 DEFAULT_STORAGE = JSONStorage(resources=[])
-
-
- 

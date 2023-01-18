@@ -55,7 +55,7 @@ class MethodNotImplemented(Exception):
 class GrantResult:
     access_instructions: typing.Optional[str] = None
     """
-    Instructions on how to access the entitlements. 
+    Instructions on how to access the entitlements.
     Common Fate will display these to the user upon a successful Access Request.
     """
 
