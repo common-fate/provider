@@ -1,8 +1,11 @@
 name: Release
+# on:
+#   push:
+#     tags:
+#       - "v*.*.*"
 on:
   push:
-    tags:
-      - "v*.*.*"
+    branches: ["main"]
 
 jobs:
   publish:
@@ -16,9 +19,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Get tag version
+        id: tag
         run: |
           TAG=${{ github.event.release.tag_name }}
-          echo "VERSION=${TAG#v}" >> $GITHUB_ENV
+          echo "VERSION=${TAG#v}" >> $GITHUB_OUTPUT
 
       - uses: actions/setup-python@v4
         with:
@@ -29,8 +33,8 @@ jobs:
           poetry-version: ${{ matrix.poetry-version }}
       - name: Update package verison
         run: |
-          echo "updating package version to ${VERSION}"
-          poetry version ${VERSION}
+          echo "updating package version to ${{steps.tag.outputs.VERSION}}"
+          poetry version ${{steps.tag.outputs.VERSION}}"
       - name: Publish
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
