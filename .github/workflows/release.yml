@@ -1,8 +1,8 @@
 name: Release
 on:
   push:
-    branches:
-      - "main"
+    tags:
+      - "v*.*.*"
 
 jobs:
   publish:
@@ -15,6 +15,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
+      - name: Get tag version
+        run: |
+          TAG=${{ github.event.release.tag_name }}
+          echo "VERSION=${TAG#v}" >> $GITHUB_ENV
+
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
@@ -27,4 +32,5 @@ jobs:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
         run: |
           poetry config pypi-token.pypi $PYPI_TOKEN
+          poetry version ${{VERSION}}
           poetry publish --build
