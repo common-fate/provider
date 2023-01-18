@@ -20,7 +20,10 @@ jobs:
         run: |
           TAG=${{github.ref_name}}
           echo "VERSION=${TAG#v}" >> $GITHUB_OUTPUT
-          echo "VERSION is ${VERSION}"
+      - name: Update package version
+        run: |
+          echo "updating package version to ${{steps.tag.outputs.VERSION}}"
+          poetry version ${{ steps.tag.outputs.VERSION }}
 
       - uses: actions/setup-python@v4
         with:
@@ -29,10 +32,7 @@ jobs:
         uses: abatilo/actions-poetry@v2
         with:
           poetry-version: ${{ matrix.poetry-version }}
-      - name: Update package verison
-        run: |
-          echo "updating package version to ${{steps.tag.outputs.VERSION}}"
-          poetry version ${{steps.tag.outputs.VERSION}}"
+
       - name: Publish
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
