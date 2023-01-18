@@ -27,10 +27,13 @@ jobs:
         uses: abatilo/actions-poetry@v2
         with:
           poetry-version: ${{ matrix.poetry-version }}
+      - name: Update package verison
+        run: |
+          echo "updating package version to ${VERSION}"
+          poetry version ${VERSION}
       - name: Publish
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
         run: |
           poetry config pypi-token.pypi $PYPI_TOKEN
-          poetry version ${VERSION}
           poetry publish --build
