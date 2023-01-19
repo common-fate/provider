@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "commonfate_provider"
-version = "0.1.0"
+version = "0.1.5"
 description = "This is the core Provider framework on top of which Access Provider are written."
 authors = ["Chris Norman <chris@commonfate.io>", "Manish Chaulagain <manish@commonfate.io>", "Josh Wilkes <josh@commonfate.io>", "Jack Meyer <jack@commonfate.io>", "Jordi Hermoso <jordi@commonfate.io>"]
 readme = "README.md"
@@ -10,7 +10,7 @@ include = ["commonfate_provider/**/*.py"]
 exclude = ["commonfate_provider/tests/**"]
 
 [tool.poetry.dependencies]
-python = "3.9.16"
+python = "^3.9"
 toml = "0.10.2"
 click = "8.1.3"
 pytest = "7.2.0"
