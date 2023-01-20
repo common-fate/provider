@@ -7,6 +7,14 @@ class BasicProvider(provider.Provider):
 
 class ExampleProvider(provider.Provider):
     value = provider.String()
+    
+class Args(args.Args):
+    test = args.Resource(
+        title="test",
+        resource={},
+        description="test",
+
+    )
 
 
 @provider.config_validator(name="List Users")
@@ -18,6 +26,14 @@ def can_list_users(provider: ExampleProvider, diagnostics: diagnostics.Logs) -> 
 def fails(provider: ExampleProvider, diagnostics: diagnostics.Logs) -> None:
     raise Exception("something bad happened")
 
+@provider.grant_validator(name="Success")
+def success(p: ExampleProvider, subject: str, args: Args):
+    diagnostics.info("some message here")
+
+
+@provider.grant_validator(name="Fails")
+def fails(provider: ExampleProvider, diagnostics: diagnostics.Logs) -> None:
+    raise Exception("something bad happened")
 
 def test_init_works():
     config = '{"value": "test"}'
@@ -41,6 +57,23 @@ def test_provider_config_validation_works():
     config = '{"value": "test"}'
     prov = ExampleProvider(provider.StringLoader(config))
     got = prov.validate_config()
+    want = {
+        "can_list_users": {
+            "logs": [{"level": "info", "msg": "some message here"}],
+            "success": True,
+        },
+        "fails": {
+            "logs": [{"level": "error", "msg": "something bad happened"}],
+            "success": False,
+        },
+    }
+    assert got == want
+
+
+def test_provider_validation_works():
+    config = '{"value": "test"}'
+    prov = ExampleProvider(provider.StringLoader(config))
+    got = prov.validate_grant()
     want = {
         "can_list_users": {
             "logs": [{"level": "info", "msg": "some message here"}],

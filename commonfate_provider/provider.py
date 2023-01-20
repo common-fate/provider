@@ -89,6 +89,28 @@ class Provider(ABC):
             }
         return results
 
+    def validate_grant(self, subject, args) -> dict:
+        print("getting grant validations")
+        all_validators = _ALL_GRANT_VALIDATORS.get(self._internal_key, {})
+
+        print("running grant validations")
+        results = {}
+        for key in all_validators:
+            validate = all_validators[key]
+            diags = diagnostics.Logs()
+            try:
+                validate.func(self, subject, args)
+                print("success")
+            except Exception as e:
+                print(e)
+                diags.error(str(e))
+
+            results[validate.id] = {
+                "logs": [l.__dict__ for l in diags.logs],
+                "success": diags.succeeded(),
+            }
+        return results
+
     @classmethod
     def export_schema(cls) -> dict:
         """
@@ -157,6 +179,9 @@ class GrantValidator:
 
 
 _ALL_GRANT_VALIDATORS: typing.Dict[str, typing.Dict[str, GrantValidator]] = {}
+
+def _get_grant_validators_func( _internal_key: str = "default") -> typing.Dict[str, GrantValidator]:
+    return _ALL_GRANT_VALIDATORS[_internal_key]
 
 
 def grant_validator(

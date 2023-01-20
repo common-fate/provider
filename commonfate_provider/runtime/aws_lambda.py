@@ -62,6 +62,15 @@ class AWSLambdaRuntime:
 
         if isinstance(event, Grant):
             args = self.args_cls(event.data.args)
+            results = self.provider.validate_grant(event.data.subject, args)
+            for r in results.items():
+                res = dict(r[1])
+
+                if res["success"] == False:
+                    print("an error occured when validating grant")
+                    return {"message": "error validating grant"}
+                else:
+                    print("validation passed")
             grant = provider._get_grant_func()
             grant(self.provider, event.data.subject, args)
             return {"message": "granting access"}
