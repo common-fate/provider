@@ -19,6 +19,10 @@ class Revoke(BaseModel):
     data: GrantData
 
 
+class Schema(BaseModel):
+    type: typing.Literal["schema"]
+
+
 class Options(BaseModel):
     class Data(BaseModel):
         arg: str
@@ -40,7 +44,7 @@ class LoadResources(BaseModel):
 
 
 class Event(BaseModel):
-    __root__: typing.Union[Grant, Revoke, Options, LoadResources] = Field(
+    __root__: typing.Union[Grant, Revoke, Options, LoadResources, Schema] = Field(
         ..., discriminator="type"
     )
 
@@ -70,6 +74,11 @@ class AWSLambdaRuntime:
 
         if isinstance(event, Options):
             self.args_cls.options(self.provider, event.data.arg)
+
+        if isinstance(event, Schema):
+            print("starting to get schema")
+            print({"args": self.args_cls.export_schema()})
+            return {"args": self.args_cls.export_schema()}
 
         elif isinstance(event, LoadResources):
             resources._reset()
