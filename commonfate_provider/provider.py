@@ -25,7 +25,6 @@ class ConfigLoader(ABC):
     def load(self) -> dict:
         pass
 
-
 class StringLoader(ConfigLoader):
     def __init__(self, config_json: str) -> None:
         self.config = config_json
@@ -46,6 +45,13 @@ class NoopLoader(ConfigLoader):
     def load(self):
         return {}
 
+class SecretLoader(ABC):
+    @abstractmethod
+    def load(self, secret_path: str) -> str:
+        pass
+class NoopSecretLoader(SecretLoader):
+    def load(self,  secret_path: str):
+        return secret_path
 
 class MethodNotImplemented(Exception):
     pass
@@ -61,7 +67,7 @@ class GrantResult:
 
 
 class Provider(ABC):
-    def __init__(self, config_loader: ConfigLoader) -> None:
+    def __init__(self, config_loader: ConfigLoader, secret_loader: SecretLoader) -> None:
         self._internal_key = "default"
         config_dict = config_loader.load()
         all_vars = [
@@ -70,7 +76,10 @@ class Provider(ABC):
         for k, v in all_vars:
             if isinstance(v, String):
                 val = config_dict[k]
-                v.set(val=val)
+                if v.secret:
+                    v.set(val=secret_loader.load(val))
+                else:
+                    v.set(val=val)
                 setattr(self, k, v)
 
     def validate_config(self) -> dict:

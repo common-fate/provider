@@ -1,5 +1,6 @@
 from commonfate_provider import provider, args, resources, tasks
 import typing
+import boto3
 
 from pydantic import BaseModel, Field
 
@@ -47,6 +48,18 @@ class Event(BaseModel):
     __root__: typing.Union[Grant, Revoke, Options, LoadResources, Schema] = Field(
         ..., discriminator="type"
     )
+
+
+class SSMSecretLoader(provider.SecretLoader):
+    def load(self,  secret_path: str):
+        # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.get_secret_value
+        client = boto3.client("ssm")
+        value = client.get_secret_value(
+            SecretId='string',
+            VersionId='string',
+            VersionStage='string'
+        )
+        return value["SecretString"]
 
 
 class AWSLambdaRuntime:
