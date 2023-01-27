@@ -110,7 +110,7 @@ class Provider(ABC):
         all_vars = [(k, v) for (k, v) in vars(cls).items() if not k.startswith("__")]
         for k, v in all_vars:
             if type(v) == String:
-                config_vars[k] = {"type": "string"}
+                config_vars[k] = {"type": "string", "usage": v.usage}
         return config_vars
 
 
