@@ -54,8 +54,11 @@ class SSMSecretLoader(provider.SecretLoader):
     def load(self,  secret_path: str):
         # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.get_secret_value
         client = boto3.client("ssm")
+
+        # @TODO need to split the secret path up accordingly for ssm
+        # path will be prefixed with awsssm:// and suffixed with a version
         value = client.get_secret_value(
-            SecretId='string',
+            SecretId=secret_path,
             VersionId='string',
             VersionStage='string'
         )
