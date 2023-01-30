@@ -77,7 +77,7 @@ class AWSLambdaRuntime:
 
         if isinstance(event, Schema):
             print("starting to get schema")
-            return {"target": self.args_cls.export_schema()}
+            return {"target": self.args_cls.export_schema(self.provider.get_version())}
 
         elif isinstance(event, LoadResources):
             resources._reset()

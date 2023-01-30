@@ -18,7 +18,14 @@ class String(Field):
 
     def get(self) -> str:
         return self._value
+    
 
+class Version(Field):
+    def set(self, val: str) -> None:
+        self._value = val
+
+    def get(self) -> str:
+        return self._value
 
 class ConfigLoader(ABC):
     @abstractmethod
@@ -64,15 +71,32 @@ class Provider(ABC):
     def __init__(self, config_loader: ConfigLoader) -> None:
         self._internal_key = "default"
         config_dict = config_loader.load()
+        
+        diags = diagnostics.Logs()
+        
+        #set the providers version with initializing
+        version = config_dict["version"]
+        if version == "":
+            diags.error("version not set in provider implementation")
+        
+        # retrieving out all the target arguments for the provider implementation
         all_vars = [
             (k, v) for (k, v) in vars(self.__class__).items() if not k.startswith("__")
         ]
+        
+        #setting the provider args to the provider class
         for k, v in all_vars:
             if isinstance(v, String):
                 val = config_dict[k]
                 v.set(val=val)
                 setattr(self, k, v)
+            
 
+        
+                
+    def get_version(self):
+        return self.version
+    
     def validate_config(self) -> dict:
         results = {}
         all_validators = _ALL_CONFIG_VALIDATORS.get(self._internal_key, {})

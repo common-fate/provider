@@ -48,7 +48,7 @@ class Args(metaclass=ModelMeta):
         return val.fetch_options(provider)
 
     @classmethod
-    def export_schema(cls) -> dict:
+    def export_schema(cls, vers) -> dict:
         """
         Exports the argument schema defined in an Args class
         to a dictionary.
@@ -71,6 +71,9 @@ class Args(metaclass=ModelMeta):
         }
         ```
         """
+
+        schema_response = {}
+        
         arg_schema = {}
         all_vars = [(k, v) for (k, v) in vars(cls).items() if not k.startswith("__")]
         for k, v in all_vars:
@@ -97,7 +100,9 @@ class Args(metaclass=ModelMeta):
 
                 arg_schema[k] = schema
 
-        return arg_schema
+        schema_response["version"] = vers
+        schema_response["schema"] = arg_schema
+        return schema_response
 
 
 class FormElement(str, Enum):
