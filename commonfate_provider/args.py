@@ -96,6 +96,29 @@ class Args(metaclass=ModelMeta):
                         group_schema[g.__name__] = g.__dict__
 
                 arg_schema[k] = schema
+            if type(v) == Resource:
+                val: Resource = v
+                schema = {
+                    "id": k,
+                    "type": "string",
+                    "title": val.title,
+                    "options": val.fetch_options is not None,
+                    "groups": None,
+                }
+                if val.description is not None:
+                    schema["description"] = val.description
+                # if val.request_element is not None:
+                #     schema["requestFormElement"] = val.request_element
+                # if val.rule_element is not None:
+                #     schema["ruleFormElement"] = val.rule_element
+
+                if val.groups is not None:
+                    group_schema = {}
+                    for g in val.groups:
+                        group_schema[g.__name__] = g.__dict__
+
+                arg_schema[k] = schema
+
 
         return arg_schema
 
