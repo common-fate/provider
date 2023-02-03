@@ -154,6 +154,8 @@ class Field:
     description: typing.Optional[str] = None
     groups: typing.Optional[typing.Tuple[typing.Type[Group], ...]] = None
     fetch_options: typing.Optional[OptionsFetcher] = None
+    request_element: typing.Optional[FormElementValue] = None
+    rule_element: typing.Optional[FormElementValue] = None
 
 
 class String(Field):
