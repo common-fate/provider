@@ -82,13 +82,14 @@ class Args(metaclass=ModelMeta):
                     "title": val.title,
                     "options": val.fetch_options is not None,
                     "groups": None,
+                    "ruleFormElement": FormElement.INPUT,
                 }
                 if val.description is not None:
                     schema["description"] = val.description
-                # if val.request_element is not None:
-                #     schema["requestFormElement"] = val.request_element
-                # if val.rule_element is not None:
-                #     schema["ruleFormElement"] = val.rule_element
+                if val.request_element is not None:
+                    schema["requestFormElement"] = val.request_element
+                if val.rule_element is not None:
+                    schema["ruleFormElement"] = val.rule_element
 
                 if val.groups is not None:
                     group_schema = {}
@@ -104,13 +105,14 @@ class Args(metaclass=ModelMeta):
                     "title": val.title,
                     "options": val.fetch_options is not None,
                     "groups": None,
+                    "ruleFormElement": FormElement.INPUT,
                 }
                 if val.description is not None:
                     schema["description"] = val.description
-                # if val.request_element is not None:
-                #     schema["requestFormElement"] = val.request_element
-                # if val.rule_element is not None:
-                #     schema["ruleFormElement"] = val.rule_element
+                if val.request_element is not None:
+                    schema["requestFormElement"] = val.request_element
+                if val.rule_element is not None:
+                    schema["ruleFormElement"] = val.rule_element
 
                 if val.groups is not None:
                     group_schema = {}
@@ -118,7 +120,6 @@ class Args(metaclass=ModelMeta):
                         group_schema[g.__name__] = g.__dict__
 
                 arg_schema[k] = schema
-
 
         return arg_schema
 
