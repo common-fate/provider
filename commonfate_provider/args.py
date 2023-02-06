@@ -83,7 +83,7 @@ class Args(metaclass=ModelMeta):
                     "options": val.fetch_options is not None,
                     "groups": None,
                     "ruleFormElement": FormElement.INPUT,
-                    "resoureName": None,
+                    "resourceName": None,
                 }
                 if val.description is not None:
                     schema["description"] = val.description
@@ -107,7 +107,7 @@ class Args(metaclass=ModelMeta):
                     "options": val.fetch_options is not None,
                     "groups": None,
                     "ruleFormElement": FormElement.INPUT,
-                    "resoureName": val.resource.__name__,
+                    "resourceName": val.resource.__name__,
                 }
                 if val.description is not None:
                     schema["description"] = val.description
