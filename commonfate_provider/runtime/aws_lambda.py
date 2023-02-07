@@ -23,6 +23,10 @@ class Schema(BaseModel):
     type: typing.Literal["schema"]
 
 
+class Describe(BaseModel):
+    type: typing.Literal["describe"]
+
+
 class Options(BaseModel):
     class Data(BaseModel):
         arg: str
@@ -44,9 +48,9 @@ class LoadResources(BaseModel):
 
 
 class Event(BaseModel):
-    __root__: typing.Union[Grant, Revoke, Options, LoadResources, Schema] = Field(
-        ..., discriminator="type"
-    )
+    __root__: typing.Union[
+        Grant, Revoke, Options, LoadResources, Schema, Describe
+    ] = Field(..., discriminator="type")
 
 
 class AWSLambdaRuntime:
@@ -78,6 +82,12 @@ class AWSLambdaRuntime:
         if isinstance(event, Schema):
             print("starting to get schema")
             return {"target": self.args_cls.export_schema()}
+
+        if isinstance(event, Describe):
+            response = {}
+            response = self.provider.describe()
+
+            return response
 
         elif isinstance(event, LoadResources):
             resources._reset()

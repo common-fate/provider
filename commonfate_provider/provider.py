@@ -62,7 +62,9 @@ class GrantResult:
 
 class Provider(ABC):
     def __init__(self, config_loader: ConfigLoader) -> None:
+        self.version = ""
         self._internal_key = "default"
+        self.config_dict = config_loader.load()
         config_dict = config_loader.load()
         all_vars = [
             (k, v) for (k, v) in vars(self.__class__).items() if not k.startswith("__")
@@ -88,6 +90,18 @@ class Provider(ABC):
                 "success": diags.succeeded(),
             }
         return results
+
+    def describe(self) -> dict:
+        """
+        Describe returns the configuration of the provider including the current status.
+        It can be used as a healthcheck to poll the provider deployment for its current status and configuration.
+        """
+        result = {}
+        result["providerVersion"] = self.version
+        result["config"] = self.config_dict
+        result["configValidation"] = self.validate_config()
+
+        return result
 
     @classmethod
     def export_schema(cls) -> dict:
