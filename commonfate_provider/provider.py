@@ -61,8 +61,8 @@ class GrantResult:
 
 
 class Provider(ABC):
-    def __init__(self, config_loader: ConfigLoader, Version: str = "v0.0.0") -> None:
-        self.version = Version
+    def __init__(self, config_loader: ConfigLoader, version: str = "v0.0.0") -> None:
+        self.version = version
         self._internal_key = "default"
         self.config_dict = config_loader.load()
         config_dict = config_loader.load()

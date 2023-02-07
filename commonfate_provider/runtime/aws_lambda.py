@@ -84,10 +84,16 @@ class AWSLambdaRuntime:
             return {"target": self.args_cls.export_schema()}
 
         if isinstance(event, Describe):
-            response = {}
-            response = self.provider.describe()
+            # Describe returns the configuration of the provider including the current status.
+            result = {}
+            result["providerVersion"] = self.provider.version
+            result["config"] = self.provider.config_dict
+            result["configValidation"] = self.provider.validate_config()
+            result["schema"] = {}
+            result["schema"]["target"] = self.args_cls.export_schema()
+            result["schema"]["audit"] = resources.audit_schema()
 
-            return response
+            return result
 
         elif isinstance(event, LoadResources):
             resources._reset()
