@@ -86,7 +86,7 @@ class AWSLambdaRuntime:
         if isinstance(event, Describe):
             # Describe returns the configuration of the provider including the current status.
             result = {}
-            result["providerVersion"] = self.provider.version
+            result["provider"] = self.provider.describe()
             result["config"] = self.provider.config_dict
             result["configValidation"] = self.provider.validate_config()
             result["schema"] = {}
