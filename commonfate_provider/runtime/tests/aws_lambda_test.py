@@ -44,3 +44,8 @@ def test_options_works():
         "data": {"arg": "group"},
     }
     runtime.handle(event=event, context=None)
+
+
+def test_provider_describe():
+    event = {"type": "describe"}
+    return runtime.handle(event=event, context=None)

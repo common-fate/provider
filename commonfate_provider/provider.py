@@ -61,8 +61,19 @@ class GrantResult:
 
 
 class Provider(ABC):
-    def __init__(self, config_loader: ConfigLoader) -> None:
+    def __init__(
+        self,
+        config_loader: ConfigLoader,
+        name: str = "",
+        version: str = "v0.0.0",
+        publisher: str = "",
+    ) -> None:
+        self.name = name
+        self.version = version
+        self.publisher = publisher
+
         self._internal_key = "default"
+        self.config_dict = config_loader.load()
         config_dict = config_loader.load()
         all_vars = [
             (k, v) for (k, v) in vars(self.__class__).items() if not k.startswith("__")
@@ -87,6 +98,14 @@ class Provider(ABC):
                 "logs": [l.__dict__ for l in diags.logs],
                 "success": diags.succeeded(),
             }
+        return results
+
+    def describe(self) -> dict:
+        results = {}
+        results["name"] = self.name
+        results["version"] = self.version
+        results["publisher"] = self.publisher
+
         return results
 
     @classmethod
