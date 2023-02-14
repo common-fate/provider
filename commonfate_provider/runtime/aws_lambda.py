@@ -19,9 +19,6 @@ class Revoke(BaseModel):
     data: GrantData
 
 
-class Schema(BaseModel):
-    type: typing.Literal["schema"]
-
 
 class Describe(BaseModel):
     type: typing.Literal["describe"]
@@ -86,9 +83,6 @@ class AWSLambdaRuntime:
         if isinstance(event, Options):
             self.args_cls.options(self.provider, event.data.arg)
 
-        if isinstance(event, Schema):
-            print("starting to get schema")
-            return {"target": self.args_cls.export_schema()}
 
         if isinstance(event, Describe):
             # Describe returns the configuration of the provider including the current status.
@@ -99,6 +93,7 @@ class AWSLambdaRuntime:
             result["schema"] = {}
             result["schema"]["target"] = self.args_cls.export_schema()
             result["schema"]["audit"] = resources.audit_schema()
+            result["schema"]["config"] = self.provider.export_schema()
 
             return result
 
