@@ -55,10 +55,17 @@ class Event(BaseModel):
 
 class AWSLambdaRuntime:
     def __init__(
-        self, provider: provider.Provider, args_cls: typing.Type[args.Args]
+        self, provider: provider.Provider, 
+        args_cls: typing.Type[args.Args], 
+        name: str = "",
+        version: str = "",
+        publisher: str = "",
     ) -> None:
         self.provider = provider
         self.args_cls = args_cls
+        self.name = name
+        self.version = version
+        self.publisher = publisher
 
     def handle(self, event, context):
         parsed = Event.parse_obj(event)
@@ -86,7 +93,7 @@ class AWSLambdaRuntime:
         if isinstance(event, Describe):
             # Describe returns the configuration of the provider including the current status.
             result = {}
-            result["provider"] = self.provider.describe()
+            result["provider"] = {"publisher":self.publisher, "name":self.name, "version":self.version}
             result["config"] = self.provider.config_dict
             result["configValidation"] = self.provider.validate_config()
             result["schema"] = {}
