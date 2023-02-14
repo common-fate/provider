@@ -1,5 +1,6 @@
 from commonfate_provider import provider, args, resources, tasks
 import typing
+import json
 
 from pydantic import BaseModel, Field
 
@@ -95,7 +96,7 @@ class AWSLambdaRuntime:
             result["schema"]["audit"] = resources.audit_schema()
             result["schema"]["config"] = self.provider.export_schema()
 
-            return result
+            return json.dumps(result)
 
         elif isinstance(event, LoadResources):
             resources._reset()
