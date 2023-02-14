@@ -46,7 +46,7 @@ class LoadResources(BaseModel):
 
 class Event(BaseModel):
     __root__: typing.Union[
-        Grant, Revoke, Options, LoadResources, Schema, Describe
+        Grant, Revoke, Options, LoadResources, Describe
     ] = Field(..., discriminator="type")
 
 
