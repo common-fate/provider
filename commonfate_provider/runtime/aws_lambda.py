@@ -6,9 +6,12 @@ from pydantic import BaseModel, Field
 
 
 class GrantData(BaseModel):
+    class Target(BaseModel):
+        arguments: typing.Dict[str, str]
+        mode: str
     subject: str
-    args: typing.Dict[str, str]
-
+    target: Target
+    
 
 class Grant(BaseModel):
     type: typing.Literal["grant"]
@@ -70,13 +73,17 @@ class AWSLambdaRuntime:
         event = parsed.__root__
 
         if isinstance(event, Grant):
-            args = self.args_cls(event.data.args)
+            if event.data.target.mode != "Default":
+                raise Exception(f"unhandled target mode, supported modes are [Default]")
+            args = self.args_cls(event.data.target.arguments)
             grant = provider._get_grant_func()
             grant(self.provider, event.data.subject, args)
             return {"message": "granting access"}
 
         elif isinstance(event, Revoke):
-            args = self.args_cls(event.data.args)
+            if event.data.target.mode != "Default":
+                raise Exception(f"unhandled target mode, supported modes are [Default]")
+            args = self.args_cls(event.data.target.arguments)
             revoke = provider._get_revoke_func()
             revoke(self.provider, event.data.subject, args)
             return {"message": "revoking access"}

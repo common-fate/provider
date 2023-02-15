@@ -122,8 +122,9 @@ class Args(metaclass=ModelMeta):
                         group_schema[g.__name__] = g.__dict__
 
                 arg_schema[k] = schema
+        # Default is a placeholder for future support of multimode providers
+        return {"Default":{"schema":arg_schema}}
 
-        return arg_schema
 
 
 class FormElement(str, Enum):
