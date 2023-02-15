@@ -69,7 +69,7 @@ class AWSLambdaRuntime:
             args = self.args_cls(event.data.target.arguments)
             grant = provider._get_grant_func()
             grant(self.provider, event.data.subject, args)
-            return {"body":{"message": "granting access"}}
+            return {"message": "granting access"}
 
         elif isinstance(event, Revoke):
             if event.data.target.mode != "Default":
@@ -77,7 +77,7 @@ class AWSLambdaRuntime:
             args = self.args_cls(event.data.target.arguments)
             revoke = provider._get_revoke_func()
             revoke(self.provider, event.data.subject, args)
-            return {"body":{"message": "revoking access"}}
+            return {"message": "revoking access"}
         if isinstance(event, Describe):
             # Describe returns the configuration of the provider including the current status.
             result = {}
@@ -89,7 +89,7 @@ class AWSLambdaRuntime:
             result["schema"]["audit"] = resources.audit_schema()
             result["schema"]["config"] = self.provider.export_schema()
 
-            return {"body":json.dumps(result)}
+            return {"body":result}
 
         elif isinstance(event, LoadResources):
             resources._reset()
