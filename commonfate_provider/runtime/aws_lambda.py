@@ -28,15 +28,6 @@ class Describe(BaseModel):
     type: typing.Literal["describe"]
 
 
-class Options(BaseModel):
-    class Data(BaseModel):
-        arg: str
-        """the argument to fetch options for"""
-
-    type: typing.Literal["options"]
-    data: Data
-
-
 class LoadResources(BaseModel):
     class Data(BaseModel):
         name: str
@@ -50,7 +41,7 @@ class LoadResources(BaseModel):
 
 class Event(BaseModel):
     __root__: typing.Union[
-        Grant, Revoke, Options, LoadResources, Describe
+        Grant, Revoke, LoadResources, Describe
     ] = Field(..., discriminator="type")
 
 
@@ -78,7 +69,7 @@ class AWSLambdaRuntime:
             args = self.args_cls(event.data.target.arguments)
             grant = provider._get_grant_func()
             grant(self.provider, event.data.subject, args)
-            return {"message": "granting access"}
+            return {"body":{"message": "granting access"}}
 
         elif isinstance(event, Revoke):
             if event.data.target.mode != "Default":
@@ -86,12 +77,7 @@ class AWSLambdaRuntime:
             args = self.args_cls(event.data.target.arguments)
             revoke = provider._get_revoke_func()
             revoke(self.provider, event.data.subject, args)
-            return {"message": "revoking access"}
-
-        if isinstance(event, Options):
-            self.args_cls.options(self.provider, event.data.arg)
-
-
+            return {"body":{"message": "revoking access"}}
         if isinstance(event, Describe):
             # Describe returns the configuration of the provider including the current status.
             result = {}
@@ -103,7 +89,7 @@ class AWSLambdaRuntime:
             result["schema"]["audit"] = resources.audit_schema()
             result["schema"]["config"] = self.provider.export_schema()
 
-            return json.dumps(result)
+            return {"body":json.dumps(result)}
 
         elif isinstance(event, LoadResources):
             resources._reset()
@@ -120,7 +106,7 @@ class AWSLambdaRuntime:
                 "pendingTasks": [t.json() for t in pending_tasks],
             }
             print(response)
-            return response
+            return {"body":response}
 
         else:
             raise Exception(f"unhandled event type")
