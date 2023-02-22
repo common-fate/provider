@@ -73,7 +73,7 @@ class Provider(ABC):
         ]
         for k, v in all_vars:
             if isinstance(v, String):
-                val = config_dict[k]
+                val = config_dict.get(k, "")
                 v.set(val=val)
                 setattr(self, k, v)
 
