@@ -34,7 +34,7 @@ try:
     import_submodules(commonfate_provider_dist)
 except ImportError:
     raise ImportError(
-        "commonfate_provider_dist didn't exist. Usually this means that the Provider has been incorrectly packaged."
+        "commonfate_provider_dist didn't exist. Usually this means that the Provider has been incorrectly packaged. Please report this issue to the provider developer."
     )
 
 
@@ -53,9 +53,10 @@ def to_camel_case(snake_str):
 def load_metadata_value(provider_data: dict, key: str):
     try:
         val = provider_data[key]
+        return val
     except KeyError:
         raise KeyError(
-            f"{key} was not found in the provider.json file. Usually this means that the provider has been incorrectly packaged. Please report this issue to the provider developer."
+            f"{key} was not found in the manifest.json file. Usually this means that the provider has been incorrectly packaged. Please report this issue to the provider developer."
         )
 
 
@@ -68,7 +69,7 @@ for key in Provider.export_schema():
 config_loader = DictLoader(config_dict=config_dict)
 provider = Provider(config_loader)
 
-with importlib.resources.open_text("commonfate_provider_dist", "provider.json") as file:
+with importlib.resources.open_text("commonfate_provider_dist", "manifest.json") as file:
     provider_data = json.load(file)
 
 
