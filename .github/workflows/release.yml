@@ -10,9 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: [3.9]
-        poetry-version: [1.3.2]
-        os: [ubuntu-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: Get tag version
@@ -27,7 +25,7 @@ jobs:
       - name: Run image
         uses: abatilo/actions-poetry@v2
         with:
-          poetry-version: ${{ matrix.poetry-version }}
+          poetry-version: 1.3.2
 
       - name: Update package version
         run: |
