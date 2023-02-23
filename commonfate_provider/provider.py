@@ -25,6 +25,7 @@ class ConfigLoader(ABC):
     def load(self) -> dict:
         pass
 
+
 class StringLoader(ConfigLoader):
     def __init__(self, config_json: str) -> None:
         self.config = config_json
@@ -45,13 +46,17 @@ class NoopLoader(ConfigLoader):
     def load(self):
         return {}
 
+
 class SecretLoader(ABC):
     @abstractmethod
     def load(self, secret_path: str) -> str:
         pass
+
+
 class NoopSecretLoader(SecretLoader):
-    def load(self,  secret_path: str):
+    def load(self, secret_path: str):
         return secret_path
+
 
 class MethodNotImplemented(Exception):
     pass
@@ -67,8 +72,11 @@ class GrantResult:
 
 
 class Provider(ABC):
-    def __init__(self, config_loader: ConfigLoader, secret_loader: SecretLoader) -> None:
+    def __init__(
+        self, config_loader: ConfigLoader, secret_loader: SecretLoader
+    ) -> None:
         self._internal_key = "default"
+        self.config_dict = config_loader.load()
         config_dict = config_loader.load()
         all_vars = [
             (k, v) for (k, v) in vars(self.__class__).items() if not k.startswith("__")
@@ -119,7 +127,13 @@ class Provider(ABC):
         all_vars = [(k, v) for (k, v) in vars(cls).items() if not k.startswith("__")]
         for k, v in all_vars:
             if type(v) == String:
-                config_vars[k] = {"type": "string"}
+                val: String = v
+
+                config_vars[k] = {
+                    "type": "string",
+                    "usage": val.usage,
+                    "secret": val.secret,
+                }
         return config_vars
 
 

@@ -6,8 +6,12 @@ from pydantic import BaseModel, Field
 
 
 class GrantData(BaseModel):
+    class Target(BaseModel):
+        arguments: typing.Dict[str, str]
+        mode: str
+
     subject: str
-    args: typing.Dict[str, str]
+    target: Target
 
 
 class Grant(BaseModel):
@@ -20,17 +24,8 @@ class Revoke(BaseModel):
     data: GrantData
 
 
-class Schema(BaseModel):
-    type: typing.Literal["schema"]
-
-
-class Options(BaseModel):
-    class Data(BaseModel):
-        arg: str
-        """the argument to fetch options for"""
-
-    type: typing.Literal["options"]
-    data: Data
+class Describe(BaseModel):
+    type: typing.Literal["describe"]
 
 
 class LoadResources(BaseModel):
@@ -45,7 +40,7 @@ class LoadResources(BaseModel):
 
 
 class Event(BaseModel):
-    __root__: typing.Union[Grant, Revoke, Options, LoadResources, Schema] = Field(
+    __root__: typing.Union[Grant, Revoke, LoadResources, Describe] = Field(
         ..., discriminator="type"
     )
 
@@ -67,33 +62,54 @@ class SSMSecretLoader(provider.SecretLoader):
 
 class AWSLambdaRuntime:
     def __init__(
-        self, provider: provider.Provider, args_cls: typing.Type[args.Args]
+        self,
+        provider: provider.Provider,
+        args_cls: typing.Type[args.Args],
+        name: str = "",
+        version: str = "",
+        publisher: str = "",
     ) -> None:
         self.provider = provider
         self.args_cls = args_cls
+        self.name = name
+        self.version = version
+        self.publisher = publisher
 
     def handle(self, event, context):
         parsed = Event.parse_obj(event)
         event = parsed.__root__
 
         if isinstance(event, Grant):
-            args = self.args_cls(event.data.args)
+            if event.data.target.mode != "Default":
+                raise Exception(f"unhandled target mode, supported modes are [Default]")
+            args = self.args_cls(event.data.target.arguments)
             grant = provider._get_grant_func()
             grant(self.provider, event.data.subject, args)
             return {"message": "granting access"}
 
         elif isinstance(event, Revoke):
-            args = self.args_cls(event.data.args)
+            if event.data.target.mode != "Default":
+                raise Exception(f"unhandled target mode, supported modes are [Default]")
+            args = self.args_cls(event.data.target.arguments)
             revoke = provider._get_revoke_func()
             revoke(self.provider, event.data.subject, args)
             return {"message": "revoking access"}
+        if isinstance(event, Describe):
+            # Describe returns the configuration of the provider including the current status.
+            result = {}
+            result["provider"] = {
+                "publisher": self.publisher,
+                "name": self.name,
+                "version": self.version,
+            }
+            result["config"] = self.provider.config_dict
+            result["configValidation"] = self.provider.validate_config()
+            result["schema"] = {}
+            result["schema"]["target"] = self.args_cls.export_schema()
+            result["schema"]["audit"] = resources.audit_schema()
+            result["schema"]["config"] = self.provider.export_schema()
 
-        if isinstance(event, Options):
-            self.args_cls.options(self.provider, event.data.arg)
-
-        if isinstance(event, Schema):
-            print("starting to get schema")
-            return {"target": self.args_cls.export_schema()}
+            return {"body": result}
 
         elif isinstance(event, LoadResources):
             resources._reset()
@@ -110,7 +126,7 @@ class AWSLambdaRuntime:
                 "pendingTasks": [t.json() for t in pending_tasks],
             }
             print(response)
-            return response
+            return {"body": response}
 
         else:
             raise Exception(f"unhandled event type")

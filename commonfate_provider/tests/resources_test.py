@@ -21,12 +21,21 @@ def load_resources():
     pass
 
 
-def test_audit_schema_works():
+def test_resource_schema_works():
     got = resources.audit_schema()
 
     want = {
         "resourceLoaders": {"load_resources": {"title": "load_resources"}},
         "resources": {
+            "ExampleResource": {
+                "properties": {
+                    "id": {"title": "Id", "type": "string"},
+                    "value": {"title": "Value", "type": "string"},
+                },
+                "required": ["id", "value"],
+                "title": "ExampleResource",
+                "type": "object",
+            },
             "FirstResource": {
                 "description": "An example resource",
                 "properties": {
@@ -38,7 +47,7 @@ def test_audit_schema_works():
                     },
                     "value": {"title": "Value", "type": "string"},
                 },
-                "required": ["id", "value", "related_field"],
+                "required": ["id", "value"],
                 "title": "FirstResource",
                 "type": "object",
             },
@@ -52,7 +61,7 @@ def test_audit_schema_works():
                     },
                     "value": {"title": "Value", "type": "string"},
                 },
-                "required": ["id", "value", "related_field"],
+                "required": ["id", "value"],
                 "title": "SecondResource",
                 "type": "object",
             },

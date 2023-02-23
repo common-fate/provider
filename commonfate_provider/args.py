@@ -82,13 +82,15 @@ class Args(metaclass=ModelMeta):
                     "title": val.title,
                     "options": val.fetch_options is not None,
                     "groups": None,
+                    "ruleFormElement": FormElement.INPUT,
+                    "resourceName": None,
                 }
                 if val.description is not None:
                     schema["description"] = val.description
-                # if val.request_element is not None:
-                #     schema["requestFormElement"] = val.request_element
-                # if val.rule_element is not None:
-                #     schema["ruleFormElement"] = val.rule_element
+                if val.request_element is not None:
+                    schema["requestFormElement"] = val.request_element
+                if val.rule_element is not None:
+                    schema["ruleFormElement"] = val.rule_element
 
                 if val.groups is not None:
                     group_schema = {}
@@ -96,8 +98,33 @@ class Args(metaclass=ModelMeta):
                         group_schema[g.__name__] = g.__dict__
 
                 arg_schema[k] = schema
+            if type(v) == Resource:
+                val: Resource = v
+                schema = {
+                    "id": k,
+                    "type": "string",
+                    "title": val.title,
+                    "options": val.fetch_options is not None,
+                    "groups": None,
+                    "ruleFormElement": FormElement.INPUT,
+                    "resourceName": val.resource.__name__,
+                }
+                if val.description is not None:
+                    schema["description"] = val.description
+                if val.request_element is not None:
+                    schema["requestFormElement"] = val.request_element
+                if val.rule_element is not None:
+                    schema["ruleFormElement"] = val.rule_element
 
-        return arg_schema
+                if val.groups is not None:
+                    group_schema = {}
+                    for g in val.groups:
+                        group_schema[g.__name__] = g.__dict__
+
+                arg_schema[k] = schema
+        # Default is a placeholder for future support of multimode providers
+        return {"Default":{"schema":arg_schema}}
+
 
 
 class FormElement(str, Enum):
@@ -130,6 +157,8 @@ class Field:
     description: typing.Optional[str] = None
     groups: typing.Optional[typing.Tuple[typing.Type[Group], ...]] = None
     fetch_options: typing.Optional[OptionsFetcher] = None
+    request_element: typing.Optional[FormElementValue] = None
+    rule_element: typing.Optional[FormElementValue] = None
 
 
 class String(Field):

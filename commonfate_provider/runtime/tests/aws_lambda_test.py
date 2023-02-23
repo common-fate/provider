@@ -33,14 +33,14 @@ runtime = AWSLambdaRuntime(provider=provider, args_cls=Args)
 def test_lambda_handler_works():
     event = {
         "type": "grant",
-        "data": {"subject": "testuser", "args": {"group": "test"}},
+        "data": {
+            "subject": "testuser",
+            "target": {"arguments": {"group": "test"}, "mode": "Default"},
+        },
     }
     runtime.handle(event=event, context=None)
 
 
-def test_options_works():
-    event = {
-        "type": "options",
-        "data": {"arg": "group"},
-    }
+def test_provider_describe():
+    event = {"type": "describe"}
     runtime.handle(event=event, context=None)
