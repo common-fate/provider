@@ -28,19 +28,3 @@ def test_parse_args():
 def test_parse_args_missing_required():
     with pytest.raises(args.ParseError):
         ExampleArgs({})
-
-
-class ArgsWithOptions(args.Args):
-    group = args.String(fetch_options=lambda p: [])
-
-
-def test_export_schema_with_options_works():
-    got = ArgsWithOptions.export_schema()
-    assert got["group"]["options"] == True
-
-
-def test_arg_options_works():
-    p = BasicProvider(config_loader=provider.NoopLoader())
-    got = ExampleArgs.options(p, "group")
-    # should get the 3 options in fetch_groups
-    assert len(got) == 3

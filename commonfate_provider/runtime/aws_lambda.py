@@ -1,6 +1,5 @@
 from commonfate_provider import provider, args, resources, tasks
 import typing
-import json
 
 from pydantic import BaseModel, Field
 
@@ -9,9 +8,10 @@ class GrantData(BaseModel):
     class Target(BaseModel):
         arguments: typing.Dict[str, str]
         mode: str
+
     subject: str
     target: Target
-    
+
 
 class Grant(BaseModel):
     type: typing.Literal["grant"]
@@ -21,7 +21,6 @@ class Grant(BaseModel):
 class Revoke(BaseModel):
     type: typing.Literal["revoke"]
     data: GrantData
-
 
 
 class Describe(BaseModel):
@@ -40,15 +39,16 @@ class LoadResources(BaseModel):
 
 
 class Event(BaseModel):
-    __root__: typing.Union[
-        Grant, Revoke, LoadResources, Describe
-    ] = Field(..., discriminator="type")
+    __root__: typing.Union[Grant, Revoke, LoadResources, Describe] = Field(
+        ..., discriminator="type"
+    )
 
 
 class AWSLambdaRuntime:
     def __init__(
-        self, provider: provider.Provider, 
-        args_cls: typing.Type[args.Args], 
+        self,
+        provider: provider.Provider,
+        args_cls: typing.Type[args.Args],
         name: str = "",
         version: str = "",
         publisher: str = "",
@@ -81,7 +81,11 @@ class AWSLambdaRuntime:
         if isinstance(event, Describe):
             # Describe returns the configuration of the provider including the current status.
             result = {}
-            result["provider"] = {"publisher":self.publisher, "name":self.name, "version":self.version}
+            result["provider"] = {
+                "publisher": self.publisher,
+                "name": self.name,
+                "version": self.version,
+            }
             result["config"] = self.provider.config_dict
             result["configValidation"] = self.provider.validate_config()
             result["schema"] = {}
@@ -89,7 +93,7 @@ class AWSLambdaRuntime:
             result["schema"]["audit"] = resources.audit_schema()
             result["schema"]["config"] = self.provider.export_schema()
 
-            return {"body":result}
+            return {"body": result}
 
         elif isinstance(event, LoadResources):
             resources._reset()
@@ -106,7 +110,7 @@ class AWSLambdaRuntime:
                 "pendingTasks": [t.json() for t in pending_tasks],
             }
             print(response)
-            return {"body":response}
+            return {"body": response}
 
         else:
             raise Exception(f"unhandled event type")
