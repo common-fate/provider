@@ -7,10 +7,10 @@ from commonfate_provider.runtime import AWSLambdaRuntime
 # and will exist in the AWS Lambda deployment zip file.
 
 try:
-    import provider_dist_package
+    import commonfate_provider_dist
 except ImportError:
     raise ImportError(
-        "provider_dist_package didn't exist. Usually this means that the Provider has been incorrectly packaged."
+        "commonfate_provider_dist didn't exist. Usually this means that the Provider has been incorrectly packaged."
     )
 
 
