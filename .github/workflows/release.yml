@@ -71,7 +71,7 @@ jobs:
       - name: Publish to PyPI
         uses: coveooss/pypi-publish-with-poetry@53a984251612fcc34011f19f855d1594ad5a5cc2
         with:
-          project-name: granted-flask
+          project-name: commonfate-provider
           pypi-token: ${{ secrets.PYPI_TOKEN }}
           pre-release: ${{ github.ref != 'refs/heads/main' }}
           dry-run: ${{ github.ref != 'refs/heads/main' && github.event.inputs.publish != 'true' }}
