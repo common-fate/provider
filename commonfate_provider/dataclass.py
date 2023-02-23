@@ -1,5 +1,5 @@
 import abc
-from typing_extensions import dataclass_transform
+from typing import dataclass_transform
 from dataclasses import dataclass
 
 
