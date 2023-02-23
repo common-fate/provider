@@ -12,20 +12,19 @@ jobs:
         python-version: [3.9]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
       - name: Get tag version
         id: tag
         run: |
           TAG=${{github.ref_name}}
           echo "VERSION=${TAG#v}" >> $GITHUB_OUTPUT
-
-      - uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Run image
-        uses: abatilo/actions-poetry@v2
-        with:
-          poetry-version: 1.3.2
 
       - name: Update package version
         run: |
