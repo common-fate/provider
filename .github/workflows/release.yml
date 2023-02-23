@@ -1,64 +1,16 @@
 name: Release
-
 on:
   push:
-  workflow_dispatch:
-    inputs:
-      publish:
-        description: "Publish to pypi.org? (will not work from forks!)"
-        required: false
-        default: "false"
+    tags:
+      - "v*.*.*"
 
 jobs:
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.9"]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install Poetry
-        run: |
-          python .vendor/install-poetry.py
-          echo "$HOME/.poetry/bin" >> $GITHUB_PATH
-      - name: Cache Poetry virtualenv
-        uses: actions/cache@v3
-        id: cache
-        with:
-          path: ~/.virtualenvs
-          key: v1-${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
-
-      - name: Set Poetry config
-        run: |
-          poetry config virtualenvs.in-project false
-          poetry config virtualenvs.path ~/.virtualenvs
-
-      - name: Install Dependencies
-        run: poetry install
-        if: steps.cache.outputs.cache-hit != 'true'
-
-      - name: Run Python Tests
-        run: poetry run pytest
-
   publish:
-    name: Publish
-    runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        python-version: ["3.9"]
-
-    needs:
-      - test
-
+        python-version: [3.9]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -68,10 +20,20 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Publish to PyPI
-        uses: coveooss/pypi-publish-with-poetry@53a984251612fcc34011f19f855d1594ad5a5cc2
-        with:
-          project-name: commonfate-provider
-          pypi-token: ${{ secrets.PYPI_TOKEN }}
-          pre-release: ${{ github.ref != 'refs/heads/main' }}
-          dry-run: ${{ github.ref != 'refs/heads/main' && github.event.inputs.publish != 'true' }}
+      - name: Get tag version
+        id: tag
+        run: |
+          TAG=${{github.ref_name}}
+          echo "VERSION=${TAG#v}" >> $GITHUB_OUTPUT
+
+      - name: Update package version
+        run: |
+          echo "updating package version to ${{steps.tag.outputs.VERSION}}"
+          poetry version ${{ steps.tag.outputs.VERSION }}
+
+      - name: Publish
+        env:
+          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+        run: |
+          poetry config pypi-token.pypi $PYPI_TOKEN
+          poetry publish --build

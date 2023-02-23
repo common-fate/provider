@@ -1,0 +1,43 @@
+name: Test
+
+on: [push]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Poetry
+        run: |
+          python .vendor/install-poetry.py
+          echo "$HOME/.poetry/bin" >> $GITHUB_PATH
+      - name: Cache Poetry virtualenv
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: ~/.virtualenvs
+          key: v1-${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Set Poetry config
+        run: |
+          poetry config virtualenvs.in-project false
+          poetry config virtualenvs.path ~/.virtualenvs
+
+      - name: Install Dependencies
+        run: poetry install
+        if: steps.cache.outputs.cache-hit != 'true'
+
+      - name: Run Python Tests
+        run: poetry run pytest
