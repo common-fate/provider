@@ -20,6 +20,11 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Install Poetry
+        run: |
+          python .vendor/install-poetry.py
+          echo "$HOME/.poetry/bin" >> $GITHUB_PATH
+
       - name: Get tag version
         id: tag
         run: |
