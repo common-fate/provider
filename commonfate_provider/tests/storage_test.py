@@ -14,7 +14,7 @@ def test_resource_equality():
 
 def test_json_storage_works():
     js = resources.JSONStorage(
-        resources=[{"type": "ExampleResource", "id": "test", "value": "test"}]
+        resources=[{"type": "ExampleResource", "data": {"id": "test", "value": "test"}}]
     )
 
     want = [ExampleResource(id="test", value="test")]

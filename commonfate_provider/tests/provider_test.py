@@ -27,7 +27,7 @@ def test_init_works():
 
 def test_export_schema_works():
     got = ExampleProvider.export_schema()
-    want = {"value": {"type": "string"}}
+    want = {"value": {"type": "string", "usage": None, "secret": False}}
     assert got == want
 
 
