@@ -48,7 +48,7 @@ python-versions = ">=3.6.1"
 name = "click"
 version = "8.1.3"
 description = "Composable command line interface toolkit"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 
@@ -59,7 +59,7 @@ colorama = {version = "*", markers = "platform_system == \"Windows\""}
 name = "colorama"
 version = "0.4.6"
 description = "Cross-platform colored terminal text."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7"
 
@@ -287,7 +287,7 @@ testing = ["coverage (>=6.2)", "coverage-enable-subprocess (>=1)", "flaky (>=3.7
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "176ed243a9a7ca029d75b5040e475909b16a0a59d5178cce39f7d785be5b576a"
+content-hash = "260b9b51b5882ffcc6dd18507afdb2f55accecfd1aff7283740d5f4cda95f3ef"
 
 [metadata.files]
 attrs = [
