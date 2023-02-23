@@ -6,7 +6,7 @@ from commonfate_provider.loader import load_provider
 import click
 
 
-def import_submodules(package, recursive=True):
+def import_submodules(package, rel_name=None, recursive=True):
     """Import all submodules of a module, recursively, including subpackages
 
     :param package: package (name or actual module)
@@ -14,7 +14,7 @@ def import_submodules(package, recursive=True):
     :rtype: dict[str, types.ModuleType]
     """
     if isinstance(package, str):
-        package = importlib.import_module(package)
+        package = importlib.import_module(package, rel_name)
     results = {}
     for loader, name, is_pkg in pkgutil.walk_packages(package.__path__):
         full_name = package.__name__ + "." + name
@@ -27,8 +27,7 @@ def import_submodules(package, recursive=True):
 @click.command()
 @click.option("--dir", default=".", help="Directory to the load the provider from")
 def schema(dir):
-    import_submodules(dir)
-    Provider, Args = load_provider()
+    Provider, Args = load_provider(dir)
     schema = {}
 
     schema["config"] = Provider.export_schema()

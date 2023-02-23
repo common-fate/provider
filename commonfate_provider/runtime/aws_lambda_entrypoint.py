@@ -60,7 +60,7 @@ def load_metadata_value(provider_data: dict, key: str):
         )
 
 
-(Provider, Args) = loader.load_provider()
+(Provider, Args) = loader.load_provider_from_subclass()
 
 config_dict = {}
 for key in Provider.export_schema():
