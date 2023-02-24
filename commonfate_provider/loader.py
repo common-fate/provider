@@ -1,8 +1,8 @@
-import importlib
 import os
 import typing
 from commonfate_provider.provider import Provider
 from commonfate_provider.args import Args
+from importlib.util import spec_from_file_location, module_from_spec
 import toml
 
 
@@ -37,14 +37,14 @@ def load_class(cwd: str, path: str):
     modulePathWithinProviderFolder = "/".join(components[:-1]) + ".py"
 
     # Import the module using an absolute path to the python file containing the Provider class
-    spec = importlib.util.spec_from_file_location(
+    spec = spec_from_file_location(
         "provider", os.path.join(cwd, modulePathWithinProviderFolder)
     )
     # Loading the module
 
     if spec is None or spec.loader is None:
         raise Exception("expected spec and spec.loader not to be None")
-    module = importlib.util.module_from_spec(spec)
+    module = module_from_spec(spec)
     spec.loader.exec_module(module)
 
     class_name = components[-1]  # ClassName
