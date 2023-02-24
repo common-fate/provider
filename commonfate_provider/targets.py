@@ -26,41 +26,36 @@ class GroupOption:
     description: typing.Optional[str] = None
 
 
-class Args(metaclass=ModelMeta):
-    """
-    Depricated. Use Target Class instead.
-    This will be removed soon.
-    """
-
-    def __init__(self, raw_args: dict) -> None:
+class Targets(metaclass=ModelMeta):
+    def __init__(self, raw_targets: dict) -> None:
         """
-        initialise Args based on a provided dictionary.
+        initialise Target based on a provided dictionary.
         """
         all_vars = [k for k in vars(self.__class__).keys() if not k.startswith("__")]
         for k in all_vars:
-            if k not in raw_args:
+            if k not in raw_targets:
                 raise ParseError(f"{k} argument is required")
-            val = raw_args[k]
+            val = raw_targets[k]
             setattr(self, k, val)
 
     @classmethod
-    def options(cls, provider: provider.Provider, arg: str) -> typing.List[Option]:
-        val = getattr(cls, arg)
+    def options(cls, provider: provider.Provider, target: str) -> typing.List[Option]:
+        val = getattr(cls, target)
         if not isinstance(val, Field):
-            raise Exception(f"invalid arg: {arg}")
+            raise Exception(f"invalid target: {target}")
         if val.fetch_options is None:
-            raise Exception(f"argument {arg} does not provide options")
+            raise Exception(f"target {target} does not provide options")
         return val.fetch_options(provider)
 
     @classmethod
     def export_schema(cls) -> dict:
         """
-        Exports the argument schema defined in an Args class
+        Exports the target schema defined in an Target class
         to a dictionary.
 
-        For example, if Args is defined as:
+        For example, if Targets is defined as:
         ```
-        class Args(args.Args):
+        class Target(target.Target):
             group = args.String(title="Group", description="group to grant access to")
         ```
 
@@ -76,7 +71,7 @@ class Args(metaclass=ModelMeta):
         }
         ```
         """
-        arg_schema = {}
+        target_schema = {}
         all_vars = [(k, v) for (k, v) in vars(cls).items() if not k.startswith("__")]
         for k, v in all_vars:
             if type(v) == String:
@@ -102,7 +97,7 @@ class Args(metaclass=ModelMeta):
                     for g in val.groups:
                         group_schema[g.__name__] = g.__dict__
 
-                arg_schema[k] = schema
+                target_schema[k] = schema
             if type(v) == Resource:
                 val: Resource = v
                 schema = {
@@ -126,9 +121,9 @@ class Args(metaclass=ModelMeta):
                     for g in val.groups:
                         group_schema[g.__name__] = g.__dict__
 
-                arg_schema[k] = schema
+                target_schema[k] = schema
         # Default is a placeholder for future support of multimode providers
-        return {"Default": {"schema": arg_schema}}
+        return {"Default": {"schema": target_schema}}
 
 
 class FormElement(str, Enum):
