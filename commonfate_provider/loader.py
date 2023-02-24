@@ -1,14 +1,14 @@
 import os
 import typing
 from commonfate_provider.provider import Provider
-from commonfate_provider.args import Args
+from commonfate_provider.targets import Targets
 from importlib.util import spec_from_file_location, module_from_spec
 import toml
 
 
 def load_provider(
     cwd: str = "",
-) -> typing.Tuple[typing.Type[Provider], typing.Type[Args]]:
+) -> typing.Tuple[typing.Type[Provider], typing.Type[Targets]]:
     """
     Loads the Common Fate Provider by reading the provider.toml file.
     This method dynamically instantiates the provider class.
@@ -53,7 +53,7 @@ def load_class(cwd: str, path: str):
 
 
 def load_provider_from_subclass() -> (
-    typing.Tuple[typing.Type[Provider], typing.Type[Args]]
+    typing.Tuple[typing.Type[Provider], typing.Type[Targets]]
 ):
     """
     Loads the Common Fate Provider.
@@ -73,11 +73,11 @@ def load_provider_from_subclass() -> (
 
     ProviderClass = classes[0]
 
-    arg_classes = Args.__subclasses__()
+    arg_classes = Targets.__subclasses__()
 
     if len(arg_classes) == 0:
         raise Exception(
-            f"could not find a Provider class. Usually this means that the Provider has been incorrectly packaged. Please report this issue to the provider developer."
+            f"could not find a Target class. Usually this means that the Provider has been incorrectly packaged. Please report this issue to the provider developer."
         )
 
     if len(arg_classes) > 1:

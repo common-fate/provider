@@ -32,9 +32,9 @@ try:
     import commonfate_provider_dist
 
     import_submodules(commonfate_provider_dist)
-except ImportError:
+except ImportError as e:
     raise ImportError(
-        "commonfate_provider_dist didn't exist. Usually this means that the Provider has been incorrectly packaged. Please report this issue to the provider developer."
+        f"{e}\nUsually this means that the Provider has been incorrectly packaged. Please report this issue to the provider developer."
     )
 
 
