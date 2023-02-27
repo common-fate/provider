@@ -51,6 +51,7 @@ class AWSLambdaRuntime:
     def __init__(
         self,
         provider: provider.Provider,
+        config_loader: provider.ConfigLoader,
         name: str = "",
         version: str = "",
         publisher: str = "",
@@ -59,6 +60,9 @@ class AWSLambdaRuntime:
         self.name = name
         self.version = version
         self.publisher = publisher
+
+        # load the provider config
+        provider._cf_load_config(config_loader=config_loader)
 
         # call the setup method on the provider to initialise any API clients etc.
         provider.setup()

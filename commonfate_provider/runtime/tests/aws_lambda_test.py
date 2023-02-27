@@ -18,11 +18,8 @@ def grant(p: BasicProvider, subject, args):
 
 
 basic_provider = BasicProvider()
-basic_provider._cf_load_config(config_loader=provider.NoopLoader())
 
-runtime = AWSLambdaRuntime(
-    provider=basic_provider,
-)
+runtime = AWSLambdaRuntime(provider=basic_provider, config_loader=provider.NoopLoader())
 
 
 def test_lambda_handler_works():
@@ -46,5 +43,7 @@ def test_lambda_runtime_calls_provider_setup():
         def setup(self):
             self.is_setup = True
 
-    runtime = AWSLambdaRuntime(provider=MyProvider())
+    runtime = AWSLambdaRuntime(
+        provider=MyProvider(), config_loader=provider.NoopLoader()
+    )
     assert runtime.provider.is_setup == True

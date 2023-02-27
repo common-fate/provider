@@ -67,7 +67,7 @@ for key in Provider.export_schema():
     config_dict[key] = os.getenv(to_camel_case(key))
 
 config_loader = DictLoader(config_dict=config_dict)
-provider = Provider(config_loader)
+provider = Provider()
 
 with importlib.resources.open_text("commonfate_provider_dist", "manifest.json") as file:
     provider_data = json.load(file)
@@ -75,6 +75,7 @@ with importlib.resources.open_text("commonfate_provider_dist", "manifest.json") 
 
 runtime = AWSLambdaRuntime(
     provider=provider,
+    config_loader=config_loader,
     name=load_metadata_value(provider_data, "name"),
     version=load_metadata_value(provider_data, "version"),
     publisher=load_metadata_value(provider_data, "publisher"),
