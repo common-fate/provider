@@ -43,11 +43,11 @@ def test_provider_config_validation_works():
     got = prov.validate_config()
     want = {
         "can_list_users": {
-            "logs": [{"level": "info", "msg": "some message here"}],
+            "logs": [{"level": "INFO", "msg": "some message here"}],
             "success": True,
         },
         "fails": {
-            "logs": [{"level": "error", "msg": "something bad happened"}],
+            "logs": [{"level": "ERROR", "msg": "something bad happened"}],
             "success": False,
         },
     }
