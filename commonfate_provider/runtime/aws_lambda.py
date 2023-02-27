@@ -1,4 +1,4 @@
-from commonfate_provider import provider, args, resources, tasks
+from commonfate_provider import provider, target, resources, tasks
 import typing
 
 from pydantic import BaseModel, Field
@@ -48,7 +48,7 @@ class AWSLambdaRuntime:
     def __init__(
         self,
         provider: provider.Provider,
-        args_cls: typing.Type[args.Args],
+        args_cls: typing.Type[target.Target],
         name: str = "",
         version: str = "",
         publisher: str = "",

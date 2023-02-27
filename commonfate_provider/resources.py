@@ -43,10 +43,10 @@ def query(cls: typing.Type[T]) -> Query[T]:
     return Query(cls)
 
 
-def Related(to: typing.Union[typing.Type[T], str]) -> str:
+def Related(to: typing.Union[typing.Type[T], str], title: str=None, description:str=None) -> str:
     if inspect.isclass(to):
         to = to.__name__
-    return Field(relatedTo=to)
+    return Field(relatedTo=to, title=title, description=description)
 
 
 def Name() -> str:  # type: ignore
@@ -56,10 +56,6 @@ def Name() -> str:  # type: ignore
 def UserEmail() -> str:  # type: ignore
     pass
 
-
-class Context(metaclass=ModelMeta):
-    def __init__(self, **data: typing.Any) -> None:
-        setattr(self, "__dict__", data)
 
 
 _ALL_RESOURCES: typing.List[Resource] = []

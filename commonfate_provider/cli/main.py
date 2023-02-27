@@ -27,12 +27,12 @@ def import_submodules(package, rel_name=None, recursive=True):
 @click.command()
 @click.option("--dir", default=".", help="Directory to the load the provider from")
 def schema(dir):
-    Provider, Args = load_provider(dir)
+    Provider, Target = load_provider(dir)
     schema = {}
 
     schema["config"] = Provider.export_schema()
     schema["audit"] = resources.audit_schema()
-    schema["target"] = Args.export_schema()
+    schema["target"] = Target.export_schema()
     print(json.dumps(schema))
 
 

@@ -1,14 +1,14 @@
 import os
 import typing
 from commonfate_provider.provider import Provider
-from commonfate_provider.targets import Targets
+from commonfate_provider.target import Target
 from importlib.util import spec_from_file_location, module_from_spec
 import toml
 
 
 def load_provider(
     cwd: str = "",
-) -> typing.Tuple[typing.Type[Provider], typing.Type[Targets]]:
+) -> typing.Tuple[typing.Type[Provider], typing.Type[Target]]:
     """
     Loads the Common Fate Provider by reading the provider.toml file.
     This method dynamically instantiates the provider class.
@@ -53,7 +53,7 @@ def load_class(cwd: str, path: str):
 
 
 def load_provider_from_subclass() -> (
-    typing.Tuple[typing.Type[Provider], typing.Type[Targets]]
+    typing.Tuple[typing.Type[Provider], typing.Type[Target]]
 ):
     """
     Loads the Common Fate Provider.
@@ -73,7 +73,7 @@ def load_provider_from_subclass() -> (
 
     ProviderClass = classes[0]
 
-    arg_classes = Targets.__subclasses__()
+    arg_classes = Target.__subclasses__()
 
     if len(arg_classes) == 0:
         raise Exception(
