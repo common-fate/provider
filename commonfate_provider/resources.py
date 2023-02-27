@@ -39,11 +39,9 @@ class Query(typing.Generic[T]):
         return DEFAULT_STORAGE.all(cls=self.cls)
 
 
-def query(cls: typing.Type[T]) -> Query[T]:
-    return Query(cls)
-
-
-def Related(to: typing.Union[typing.Type[T], str], title: str=None, description:str=None) -> str:
+def Related(
+    to: typing.Union[typing.Type[T], str], title: str = None, description: str = None
+) -> str:
     if inspect.isclass(to):
         to = to.__name__
     return Field(relatedTo=to, title=title, description=description)
@@ -55,7 +53,6 @@ def Name() -> str:  # type: ignore
 
 def UserEmail() -> str:  # type: ignore
     pass
-
 
 
 _ALL_RESOURCES: typing.List[Resource] = []
