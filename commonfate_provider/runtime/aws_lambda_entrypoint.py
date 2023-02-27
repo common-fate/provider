@@ -32,9 +32,9 @@ try:
     import commonfate_provider_dist
 
     import_submodules(commonfate_provider_dist)
-except ImportError:
+except ImportError as e:
     raise ImportError(
-        "commonfate_provider_dist didn't exist. Usually this means that the Provider has been incorrectly packaged. Please report this issue to the provider developer."
+        f"{e}\nUsually this means that the Provider has been incorrectly packaged. Please report this issue to the provider developer."
     )
 
 
@@ -67,15 +67,15 @@ for key in Provider.export_schema():
     config_dict[key] = os.getenv(to_camel_case(key))
 
 config_loader = DictLoader(config_dict=config_dict)
-provider = Provider(config_loader)
+provider = Provider()
 
 with importlib.resources.open_text("commonfate_provider_dist", "manifest.json") as file:
     provider_data = json.load(file)
 
 
 runtime = AWSLambdaRuntime(
-    provider,
-    Args,
+    provider=provider,
+    config_loader=config_loader,
     name=load_metadata_value(provider_data, "name"),
     version=load_metadata_value(provider_data, "version"),
     publisher=load_metadata_value(provider_data, "publisher"),

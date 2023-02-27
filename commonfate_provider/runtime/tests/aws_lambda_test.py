@@ -1,33 +1,25 @@
-import typing
 from commonfate_provider.runtime import AWSLambdaRuntime
-from commonfate_provider import provider, args
+from commonfate_provider import provider, access, target
 
 
 class BasicProvider(provider.Provider):
     pass
 
 
-def fetch_groups(provider: BasicProvider) -> typing.List[args.Option]:
-    return [
-        args.Option(value="one", label="one"),
-        args.Option(value="two", label="two"),
-        args.Option(value="three", label="three"),
-    ]
-
-
-class Args(args.Args):
-    group = args.String(fetch_options=fetch_groups)
+@access.target(kind="Default")
+class Args:
+    group = target.String()
     pass
 
 
-@provider.grant()
+@access.grant()
 def grant(p: BasicProvider, subject, args):
     pass
 
 
-provider = BasicProvider(config_loader=provider.NoopLoader())
+basic_provider = BasicProvider()
 
-runtime = AWSLambdaRuntime(provider=provider, args_cls=Args)
+runtime = AWSLambdaRuntime(provider=basic_provider, config_loader=provider.NoopLoader())
 
 
 def test_lambda_handler_works():
@@ -35,7 +27,7 @@ def test_lambda_handler_works():
         "type": "grant",
         "data": {
             "subject": "testuser",
-            "target": {"arguments": {"group": "test"}, "mode": "Default"},
+            "target": {"arguments": {"group": "test"}, "kind": "Default"},
         },
     }
     runtime.handle(event=event, context=None)
@@ -44,3 +36,14 @@ def test_lambda_handler_works():
 def test_provider_describe():
     event = {"type": "describe"}
     runtime.handle(event=event, context=None)
+
+
+def test_lambda_runtime_calls_provider_setup():
+    class MyProvider(provider.Provider):
+        def setup(self):
+            self.is_setup = True
+
+    runtime = AWSLambdaRuntime(
+        provider=MyProvider(), config_loader=provider.NoopLoader()
+    )
+    assert runtime.provider.is_setup == True

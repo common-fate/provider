@@ -1,7 +1,7 @@
 import importlib
 import json
 import pkgutil
-from commonfate_provider import resources
+from commonfate_provider import access, resources, target
 from commonfate_provider.loader import load_provider
 import click
 
@@ -27,12 +27,18 @@ def import_submodules(package, rel_name=None, recursive=True):
 @click.command()
 @click.option("--dir", default=".", help="Directory to the load the provider from")
 def schema(dir):
-    Provider, Args = load_provider(dir)
+    Provider = load_provider(dir)
     schema = {}
+
+    # in future we'll handle multiple kinds of targets,
+    # but for now, just get the first one
+    target_kind = next(iter(access._ALL_TARGETS))
+    target_class = access._ALL_TARGETS[target_kind]
+
+    schema["target"] = target.export_schema(target_kind, target_class)
 
     schema["config"] = Provider.export_schema()
     schema["audit"] = resources.audit_schema()
-    schema["target"] = Args.export_schema()
     print(json.dumps(schema))
 
 

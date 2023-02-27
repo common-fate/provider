@@ -1,14 +1,13 @@
 import os
 import typing
 from commonfate_provider.provider import Provider
-from commonfate_provider.args import Args
 from importlib.util import spec_from_file_location, module_from_spec
 import toml
 
 
 def load_provider(
     cwd: str = "",
-) -> typing.Tuple[typing.Type[Provider], typing.Type[Args]]:
+) -> typing.Type[Provider]:
     """
     Loads the Common Fate Provider by reading the provider.toml file.
     This method dynamically instantiates the provider class.
@@ -24,8 +23,7 @@ def load_provider(
         raise Exception(f"invalid language: {language}")
 
     provider_class = load_class(cwd, config["python"]["class"])
-    arg_class = load_class(cwd, config["python"]["arg_schema"])
-    return (provider_class, arg_class)
+    return provider_class
 
 
 def load_class(cwd: str, path: str):
@@ -52,9 +50,7 @@ def load_class(cwd: str, path: str):
     return my_class
 
 
-def load_provider_from_subclass() -> (
-    typing.Tuple[typing.Type[Provider], typing.Type[Args]]
-):
+def load_provider_from_subclass() -> typing.Type[Provider]:
     """
     Loads the Common Fate Provider.
     This method dynamically instantiates the provider class.
@@ -73,18 +69,4 @@ def load_provider_from_subclass() -> (
 
     ProviderClass = classes[0]
 
-    arg_classes = Args.__subclasses__()
-
-    if len(arg_classes) == 0:
-        raise Exception(
-            f"could not find a Provider class. Usually this means that the Provider has been incorrectly packaged. Please report this issue to the provider developer."
-        )
-
-    if len(arg_classes) > 1:
-        raise Exception(
-            f"only 1 Arg class is supported but found {len(arg_classes)}: {[cl.__name__ for cl in arg_classes]}"
-        )
-
-    ArgClass = arg_classes[0]
-
-    return (ProviderClass, ArgClass)
+    return ProviderClass
