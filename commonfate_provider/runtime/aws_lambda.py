@@ -77,7 +77,7 @@ class AWSLambdaRuntime:
                 )
 
             args = target._initialise(args_cls, event.data.target.arguments)
-            grant = provider._get_grant_func()
+            grant = access._get_grant_func()
             grant(self.provider, event.data.subject, args)
             return {"message": "granting access"}
 
@@ -92,7 +92,7 @@ class AWSLambdaRuntime:
 
             args = target._initialise(args_cls, event.data.target.arguments)
 
-            revoke = provider._get_revoke_func()
+            revoke = access._get_revoke_func()
             revoke(self.provider, event.data.subject, args)
             return {"message": "revoking access"}
         if isinstance(event, Describe):

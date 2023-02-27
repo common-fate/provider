@@ -1,4 +1,3 @@
-import typing
 from commonfate_provider.runtime import AWSLambdaRuntime
 from commonfate_provider import provider, access, target
 
@@ -13,7 +12,7 @@ class Args:
     pass
 
 
-@provider.grant()
+@access.grant()
 def grant(p: BasicProvider, subject, args):
     pass
 
