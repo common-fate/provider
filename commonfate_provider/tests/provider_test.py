@@ -19,9 +19,10 @@ def fails(provider: ExampleProvider, diagnostics: diagnostics.Logs) -> None:
     raise Exception("something bad happened")
 
 
-def test_init_works():
+def test_load_config_works():
     config = '{"value": "test"}'
-    got = ExampleProvider(provider.StringLoader(config))
+    got = ExampleProvider()
+    got._cf_load_config(provider.StringLoader(config))
     assert got.value.get() == "test"
 
 
@@ -39,8 +40,9 @@ def test_capabilities_works():
 
 def test_provider_config_validation_works():
     config = '{"value": "test"}'
-    prov = ExampleProvider(provider.StringLoader(config))
-    got = prov.validate_config()
+    prov = ExampleProvider()
+    prov._cf_load_config(provider.StringLoader(config))
+    got = prov._cf_validate_config()
     want = {
         "can_list_users": {
             "logs": [{"level": "info", "msg": "some message here"}],

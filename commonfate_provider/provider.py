@@ -61,11 +61,13 @@ class GrantResult:
 
 
 class Provider(ABC):
-    def __init__(
-        self,
-        config_loader: ConfigLoader,
-    ) -> None:
+    def __init__(self) -> None:
         self._internal_key = "default"
+
+    def _cf_load_config(self, config_loader: ConfigLoader):
+        """
+        Built-in Provider method to load config from a ConfigLoader.
+        """
         self.config_dict = config_loader.load()
         config_dict = config_loader.load()
         all_vars = [
@@ -77,7 +79,10 @@ class Provider(ABC):
                 v.set(val=val)
                 setattr(self, k, v)
 
-    def validate_config(self) -> dict:
+    def _cf_validate_config(self) -> dict:
+        """
+        Built-in Provider method to validate config.
+        """
         results = {}
         all_validators = _ALL_CONFIG_VALIDATORS.get(self._internal_key, {})
         for validator in all_validators.values():
@@ -92,6 +97,12 @@ class Provider(ABC):
                 "success": diags.succeeded(),
             }
         return results
+
+    def setup(self):
+        """
+        Provider-specific setup logic can be called here, such as creating API clients.
+        """
+        pass
 
     @classmethod
     def export_schema(cls) -> dict:
@@ -114,9 +125,13 @@ class Provider(ABC):
         all_vars = [(k, v) for (k, v) in vars(cls).items() if not k.startswith("__")]
         for k, v in all_vars:
             if type(v) == String:
-                val:String = v
-                
-                config_vars[k] = {"type": "string", "usage": val.usage, "secret":val.secret}
+                val: String = v
+
+                config_vars[k] = {
+                    "type": "string",
+                    "usage": val.usage,
+                    "secret": val.secret,
+                }
         return config_vars
 
 

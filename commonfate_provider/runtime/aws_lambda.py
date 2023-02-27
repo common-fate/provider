@@ -59,6 +59,9 @@ class AWSLambdaRuntime:
         self.version = version
         self.publisher = publisher
 
+        # call the setup method on the provider to initialise any API clients etc.
+        provider.setup()
+
     def handle(self, event, context):
         parsed = Event.parse_obj(event)
         event = parsed.__root__
@@ -87,7 +90,7 @@ class AWSLambdaRuntime:
                 "version": self.version,
             }
             result["config"] = self.provider.config_dict
-            result["configValidation"] = self.provider.validate_config()
+            result["configValidation"] = self.provider._cf_validate_config()
             result["schema"] = {}
             result["schema"]["target"] = self.args_cls.export_schema()
             result["schema"]["audit"] = resources.audit_schema()
