@@ -74,8 +74,7 @@ with importlib.resources.open_text("commonfate_provider_dist", "manifest.json") 
 
 
 runtime = AWSLambdaRuntime(
-    provider,
-    Args,
+    provider=provider,
     name=load_metadata_value(provider_data, "name"),
     version=load_metadata_value(provider_data, "version"),
     publisher=load_metadata_value(provider_data, "publisher"),

@@ -1,4 +1,4 @@
-from commonfate_provider import provider, target, resources, tasks
+from commonfate_provider import provider, access, target, resources, tasks
 import typing
 
 from pydantic import BaseModel, Field
@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 class GrantData(BaseModel):
     class Target(BaseModel):
         arguments: typing.Dict[str, str]
-        mode: str
+        kind: str
 
     subject: str
     target: Target
@@ -44,17 +44,18 @@ class Event(BaseModel):
     )
 
 
+_T = typing.TypeVar("_T")
+
+
 class AWSLambdaRuntime:
     def __init__(
         self,
         provider: provider.Provider,
-        args_cls: typing.Type[target.Target],
         name: str = "",
         version: str = "",
         publisher: str = "",
     ) -> None:
         self.provider = provider
-        self.args_cls = args_cls
         self.name = name
         self.version = version
         self.publisher = publisher
@@ -67,17 +68,30 @@ class AWSLambdaRuntime:
         event = parsed.__root__
 
         if isinstance(event, Grant):
-            if event.data.target.mode != "Default":
-                raise Exception(f"unhandled target mode, supported modes are [Default]")
-            args = self.args_cls(event.data.target.arguments)
+            try:
+                args_cls = access._ALL_TARGETS[event.data.target.kind]
+            except KeyError:
+                all_keys = ",".join(access._ALL_TARGETS.keys())
+                raise KeyError(
+                    f"unhandled target kind {event.data.target.kind}, supported kinds are [{all_keys}]"
+                )
+
+            args = target._initialise(args_cls, event.data.target.arguments)
             grant = provider._get_grant_func()
             grant(self.provider, event.data.subject, args)
             return {"message": "granting access"}
 
         elif isinstance(event, Revoke):
-            if event.data.target.mode != "Default":
-                raise Exception(f"unhandled target mode, supported modes are [Default]")
-            args = self.args_cls(event.data.target.arguments)
+            try:
+                args_cls = access._ALL_TARGETS[event.data.target.kind]
+            except KeyError:
+                all_keys = ",".join(access._ALL_TARGETS.keys())
+                raise KeyError(
+                    f"unhandled target kind {event.data.target.kind}, supported kinds are [{all_keys}]"
+                )
+
+            args = target._initialise(args_cls, event.data.target.arguments)
+
             revoke = provider._get_revoke_func()
             revoke(self.provider, event.data.subject, args)
             return {"message": "revoking access"}
@@ -92,7 +106,13 @@ class AWSLambdaRuntime:
             result["config"] = self.provider.config_dict
             result["configValidation"] = self.provider._cf_validate_config()
             result["schema"] = {}
-            result["schema"]["target"] = self.args_cls.export_schema()
+
+            # in future we'll handle multiple kinds of targets,
+            # but for now, just get the first one
+            target_kind = next(iter(access._ALL_TARGETS))
+            target_class = access._ALL_TARGETS[target_kind]
+
+            result["schema"]["target"] = target.export_schema(target_kind, target_class)
             result["schema"]["audit"] = resources.audit_schema()
             result["schema"]["config"] = self.provider.export_schema()
 

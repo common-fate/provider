@@ -31,14 +31,6 @@ class Resource(BaseModel):
 T = typing.TypeVar("T", bound=Resource)
 
 
-class Query(typing.Generic[T]):
-    def __init__(self, cls: typing.Type[T]) -> None:
-        self.cls = cls
-
-    def all(self) -> typing.List[T]:
-        return DEFAULT_STORAGE.all(cls=self.cls)
-
-
 def Related(
     to: typing.Union[typing.Type[T], str], title: str = None, description: str = None
 ) -> str:

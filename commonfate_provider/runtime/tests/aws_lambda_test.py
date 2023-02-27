@@ -1,13 +1,14 @@
 import typing
 from commonfate_provider.runtime import AWSLambdaRuntime
-from commonfate_provider import provider, target
+from commonfate_provider import provider, access, target
 
 
 class BasicProvider(provider.Provider):
     pass
 
 
-class Args(target.Target):
+@access.target(kind="Default")
+class Args:
     group = target.String()
     pass
 
@@ -20,7 +21,9 @@ def grant(p: BasicProvider, subject, args):
 basic_provider = BasicProvider()
 basic_provider._cf_load_config(config_loader=provider.NoopLoader())
 
-runtime = AWSLambdaRuntime(provider=basic_provider, args_cls=Args)
+runtime = AWSLambdaRuntime(
+    provider=basic_provider,
+)
 
 
 def test_lambda_handler_works():
@@ -28,7 +31,7 @@ def test_lambda_handler_works():
         "type": "grant",
         "data": {
             "subject": "testuser",
-            "target": {"arguments": {"group": "test"}, "mode": "Default"},
+            "target": {"arguments": {"group": "test"}, "kind": "Default"},
         },
     }
     runtime.handle(event=event, context=None)
@@ -44,5 +47,5 @@ def test_lambda_runtime_calls_provider_setup():
         def setup(self):
             self.is_setup = True
 
-    runtime = AWSLambdaRuntime(provider=MyProvider(), args_cls=Args)
+    runtime = AWSLambdaRuntime(provider=MyProvider())
     assert runtime.provider.is_setup == True
