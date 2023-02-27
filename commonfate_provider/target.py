@@ -67,10 +67,6 @@ class Target(metaclass=ModelMeta):
                 }
                 if val.description is not None:
                     schema["description"] = val.description
-                if val.request_element is not None:
-                    schema["requestFormElement"] = val.request_element
-                if val.rule_element is not None:
-                    schema["ruleFormElement"] = val.rule_element
 
                 target_schema[k] = schema
             if type(v) == Resource:
@@ -84,19 +80,21 @@ class Target(metaclass=ModelMeta):
 
                 if val.resource is not None:
                     properties = {}
-                    all_vars = [(k2, v) for (k2, v) in vars(val.resource).items() if not k2.startswith("__")]
+                    all_vars = [
+                        (k2, v)
+                        for (k2, v) in vars(val.resource).items()
+                        if not k2.startswith("__")
+                    ]
                     for k3, v in all_vars:
                         properties[k3] = {"type": "string"}
                     schema["resource"] = val.resource.schema()
-                
+
                 if val.description is not None:
                     schema["description"] = val.description
 
                 target_schema[k] = schema
         # Default is a placeholder for future support of multimode providers
         return {"Default": {"schema": target_schema}}
-
-
 
 
 @dataclass

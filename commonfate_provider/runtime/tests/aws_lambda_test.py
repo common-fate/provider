@@ -7,16 +7,8 @@ class BasicProvider(provider.Provider):
     pass
 
 
-def fetch_groups(provider: BasicProvider) -> typing.List[target.Option]:
-    return [
-        target.Option(value="one", label="one"),
-        target.Option(value="two", label="two"),
-        target.Option(value="three", label="three"),
-    ]
-
-
 class Args(target.Target):
-    group = target.String(fetch_options=fetch_groups)
+    group = target.String()
     pass
 
 

@@ -1,4 +1,4 @@
-from commonfate_provider import provider, diagnostics, args
+from commonfate_provider import provider, diagnostics
 
 
 class BasicProvider(provider.Provider):

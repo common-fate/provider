@@ -4,16 +4,8 @@ from commonfate_provider import target
 from commonfate_provider import provider
 
 
-def fetch_groups(_) -> typing.List[target.Option]:
-    return [
-        target.Option(value="one", label="one"),
-        target.Option(value="two", label="two"),
-        target.Option(value="three", label="three"),
-    ]
-
-
 class ExampleArgs(target.Target):
-    group = target.String(fetch_options=fetch_groups)
+    group = target.String()
 
 
 class BasicProvider(provider.Provider):
