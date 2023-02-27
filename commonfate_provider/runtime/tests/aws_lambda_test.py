@@ -1,22 +1,22 @@
 import typing
 from commonfate_provider.runtime import AWSLambdaRuntime
-from commonfate_provider import provider, args
+from commonfate_provider import provider, target
 
 
 class BasicProvider(provider.Provider):
     pass
 
 
-def fetch_groups(provider: BasicProvider) -> typing.List[args.Option]:
+def fetch_groups(provider: BasicProvider) -> typing.List[target.Option]:
     return [
-        args.Option(value="one", label="one"),
-        args.Option(value="two", label="two"),
-        args.Option(value="three", label="three"),
+        target.Option(value="one", label="one"),
+        target.Option(value="two", label="two"),
+        target.Option(value="three", label="three"),
     ]
 
 
-class Args(args.Args):
-    group = args.String(fetch_options=fetch_groups)
+class Args(target.Target):
+    group = target.String(fetch_options=fetch_groups)
     pass
 
 
