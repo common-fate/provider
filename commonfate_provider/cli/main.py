@@ -31,6 +31,14 @@ def import_submodules(package, recursive=True):
 
 @click.command()
 def schema():
+    cwd = os.getcwd()
+
+    dirname = os.path.basename(cwd)
+    parent_folder = os.path.abspath(os.path.join(dirname, "..", ".."))
+
+    sys.path.append(parent_folder)
+    import_submodules(dirname)
+
     schema = export_schema()
     print(json.dumps(schema))
 
