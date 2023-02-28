@@ -7,6 +7,7 @@ from commonfate_provider import config
 from commonfate_provider.runtime.aws_lambda import AWSLambdaRuntime
 from commonfate_provider.runtime.initialise import initialise_provider
 from commonfate_provider.schema import export_schema
+from contextlib import redirect_stdout
 import click
 
 
@@ -54,7 +55,11 @@ def run(event):
         provider=provider,
     )
     event_json = json.loads(event)
-    result = runtime.handle(event=event_json, context=None)
+
+    # redirect stdout to stderr, in case the provider logs any
+    # messages using print()
+    with redirect_stdout(sys.stderr):
+        result = runtime.handle(event=event_json, context=None)
     print(json.dumps(result))
 
 
