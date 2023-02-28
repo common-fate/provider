@@ -31,19 +31,6 @@ def Related(
     return Field(relatedTo=to, title=title, description=description)
 
 
-# def Name() -> str:  # type: ignore
-#     pass
-
-
-# def UserEmail() -> str:  # type: ignore
-#     pass
-
-
-# def set_fixture(resources: typing.List[Resource]):
-#     global DEFAULT_STORAGE
-#     DEFAULT_STORAGE.resources = [r.export_json() for r in resources]
-
-
 def fetcher(func: tasks.LoaderFunc):
     namespace.register_resource_loader(fetcher)
     return func
@@ -76,22 +63,3 @@ def register(resource: Resource):
 
 def without_keys(d, keys):
     return {x: d[x] for x in d if x not in keys}
-
-
-class JSONStorage:
-    def __init__(self, resources: typing.List[dict]) -> None:
-        self.resources = resources
-
-    def all(self, cls: typing.Type[T]) -> typing.List[T]:
-        resources: typing.List[T] = []
-        class_name = cls.__name__
-        for r in self.resources:
-            if r["type"] == class_name:
-                values = without_keys(r, ["type"])
-                resource = cls(**values["data"])
-                resources.append(resource)
-
-        return resources
-
-
-# DEFAULT_STORAGE = JSONStorage(resources=[])
