@@ -46,3 +46,19 @@ def test_schema_with_config(snapshot_json):
 
     actual = schema.export_schema()
     assert actual == snapshot_json
+
+
+def test_multiple_targets(snapshot_json):
+    class Provider(provider.Provider):
+        pass
+
+    @access.target()
+    class MyTarget:
+        first = target.String(description="first var", title="First")
+
+    @access.target()
+    class SecondTarget:
+        second = target.String(description="second var", title="Second")
+
+    actual = schema.export_schema()
+    assert actual == snapshot_json

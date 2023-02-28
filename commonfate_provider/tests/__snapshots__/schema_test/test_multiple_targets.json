@@ -1,0 +1,31 @@
+{
+  "audit": {
+    "resourceLoaders": {},
+    "resources": {}
+  },
+  "config": {},
+  "target": {
+    "MyTarget": {
+      "schema": {
+        "first": {
+          "description": "first var",
+          "id": "first",
+          "resourceName": null,
+          "title": "First",
+          "type": "string"
+        }
+      }
+    },
+    "SecondTarget": {
+      "schema": {
+        "second": {
+          "description": "second var",
+          "id": "second",
+          "resourceName": null,
+          "title": "Second",
+          "type": "string"
+        }
+      }
+    }
+  }
+}

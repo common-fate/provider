@@ -1,4 +1,12 @@
-from commonfate_provider import provider, access, target, resources, tasks
+from commonfate_provider import (
+    provider,
+    access,
+    target,
+    resources,
+    tasks,
+    namespace,
+    schema,
+)
 import typing
 
 from pydantic import BaseModel, Field
@@ -73,9 +81,10 @@ class AWSLambdaRuntime:
 
         if isinstance(event, Grant):
             try:
-                args_cls = access._ALL_TARGETS[event.data.target.kind]
+                target_classes = namespace.get_target_classes()
+                args_cls = target_classes[event.data.target.kind]
             except KeyError:
-                all_keys = ",".join(access._ALL_TARGETS.keys())
+                all_keys = ",".join(target_classes.keys())
                 raise KeyError(
                     f"unhandled target kind {event.data.target.kind}, supported kinds are [{all_keys}]"
                 )
@@ -87,9 +96,10 @@ class AWSLambdaRuntime:
 
         elif isinstance(event, Revoke):
             try:
-                args_cls = access._ALL_TARGETS[event.data.target.kind]
+                target_classes = namespace.get_target_classes()
+                args_cls = target_classes[event.data.target.kind]
             except KeyError:
-                all_keys = ",".join(access._ALL_TARGETS.keys())
+                all_keys = ",".join(target_classes.keys())
                 raise KeyError(
                     f"unhandled target kind {event.data.target.kind}, supported kinds are [{all_keys}]"
                 )
@@ -109,16 +119,7 @@ class AWSLambdaRuntime:
             }
             result["config"] = self.provider.config_dict
             result["configValidation"] = self.provider._cf_validate_config()
-            result["schema"] = {}
-
-            # in future we'll handle multiple kinds of targets,
-            # but for now, just get the first one
-            target_kind = next(iter(access._ALL_TARGETS))
-            target_class = access._ALL_TARGETS[target_kind]
-
-            result["schema"]["target"] = target.export_schema(target_kind, target_class)
-            result["schema"]["audit"] = resources.audit_schema()
-            result["schema"]["config"] = self.provider.export_schema()
+            result["schema"] = schema.export_schema()
 
             return {"body": result}
 

@@ -1,6 +1,13 @@
 import pytest
-from commonfate_provider import target, access, resources
+from commonfate_provider import namespace, target, access, resources
 from commonfate_provider import provider
+
+
+@pytest.fixture(autouse=True)
+def fresh_namespace():
+    """clear the registered provider, targets etc between test runs"""
+    yield
+    namespace.clear()
 
 
 @access.target()
@@ -19,14 +26,11 @@ def test_parse_args_missing_required():
 
 
 def test_export_target_schema():
-    # reset the registered targets
-    access._ALL_TARGETS = {}
-
     @access.target()
     class ExampleTarget:
         my_property = target.String(title="MyProperty")
 
-    got = target.export_schema("ExampleTarget", ExampleTarget)
+    got = target.export_schema()
 
     want = {
         "ExampleTarget": {
@@ -45,9 +49,6 @@ def test_export_target_schema():
 
 
 def test_export_target_resource_schema():
-    # reset the registered targets
-    access._ALL_TARGETS = {}
-
     class MyResource(resources.Resource):
         pass
 
@@ -56,7 +57,7 @@ def test_export_target_resource_schema():
         my_property = target.String(title="MyProperty")
         my_resource = target.Resource(title="MyResource", resource=MyResource)
 
-    got = target.export_schema("ExampleTarget", ExampleTarget)
+    got = target.export_schema()
 
     want = {
         "ExampleTarget": {

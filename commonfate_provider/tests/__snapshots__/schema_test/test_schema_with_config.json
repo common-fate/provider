@@ -35,8 +35,41 @@
     }
   },
   "target": {
-    "SomethingElse": {
-      "schema": {}
+    "MyTarget": {
+      "schema": {
+        "first": {
+          "description": "first var",
+          "id": "first",
+          "resourceName": null,
+          "title": "First",
+          "type": "string"
+        },
+        "my_resource": {
+          "description": "first var",
+          "id": "my_resource",
+          "resource": {
+            "properties": {
+              "id": {
+                "title": "Id",
+                "type": "string"
+              },
+              "some_val": {
+                "title": "Some Val",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "some_val"
+            ],
+            "title": "ConfigResource",
+            "type": "object"
+          },
+          "resourceName": "ConfigResource",
+          "title": "First",
+          "type": "string"
+        }
+      }
     }
   }
 }
