@@ -70,3 +70,21 @@ def test_provider_describe_with_config(snapshot_json):
     event = {"type": "describe"}
     actual = runtime.handle(event=event, context=None)
     assert actual == snapshot_json
+
+
+def test_provider_describe_with_errors(snapshot_json):
+    class Provider(provider.Provider):
+        api_url = provider.String(usage="API URL")
+        api_key = provider.String(usage="API key", secret=True)
+
+    p = helper.initialise_test_provider(
+        {"api_url": "https://example.com", "api_key": "abcdef"}
+    )
+    runtime = AWSLambdaRuntime(
+        provider=p, publisher="acmecorp", name="test", version="v0.1.0"
+    )
+    p.diagnostics.error("some error happened!")
+
+    event = {"type": "describe"}
+    actual = runtime.handle(event=event, context=None)
+    assert actual == snapshot_json
