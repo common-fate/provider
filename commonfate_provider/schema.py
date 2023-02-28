@@ -1,4 +1,4 @@
-from commonfate_provider import access, namespace, resources, target, loader
+from commonfate_provider import namespace, resources, target
 
 
 def export_schema() -> dict:

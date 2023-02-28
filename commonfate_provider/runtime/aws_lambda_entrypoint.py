@@ -1,7 +1,7 @@
 import os
-from commonfate_provider import config, loader
-from commonfate_provider.provider import DictLoader
+from commonfate_provider import config
 from commonfate_provider.runtime import AWSLambdaRuntime
+from commonfate_provider.runtime.initialise import initialise_provider
 import importlib.resources
 import json
 import importlib
@@ -48,9 +48,7 @@ def load_metadata_value(provider_data: dict, key: str):
         )
 
 
-Provider = loader.load_provider_from_subclass()
-
-provider = Provider()
+provider = initialise_provider(configurer=config.AWS_LAMBDA_LOADER)
 
 with importlib.resources.open_text("commonfate_provider_dist", "manifest.json") as file:
     provider_data = json.load(file)
@@ -58,7 +56,6 @@ with importlib.resources.open_text("commonfate_provider_dist", "manifest.json") 
 
 runtime = AWSLambdaRuntime(
     provider=provider,
-    configurer=config.AWS_LAMBDA_LOADER,
     name=load_metadata_value(provider_data, "name"),
     version=load_metadata_value(provider_data, "version"),
     publisher=load_metadata_value(provider_data, "publisher"),

@@ -1,8 +1,5 @@
-import os
 import typing
-import json
 from dataclasses import dataclass
-from abc import ABC, abstractmethod
 from commonfate_provider.config import loaders
 from commonfate_provider import provider
 
@@ -22,7 +19,7 @@ class Configurer:
     """
 
     string_loaders: typing.Set[loaders.StringLoader]
-    secret_string_loaders: typing.Set[loaders.StringLoader]
+    secret_string_loaders: typing.Set[loaders.SecretStringLoader]
 
     def configure(self, p: provider.Provider):
         """
@@ -53,17 +50,31 @@ class Configurer:
                 self.resolve_string(p=p, key=k, val=v)
 
     def resolve_string(self, p: provider.Provider, key: str, val: provider.String):
-        # switch the loader depending on whether we are trying to get
-        # secrets or regular config variables.
-        loader = self.secret_string_loaders if val.secret else self.string_loaders
+        if val.secret is True:
+            # the value is a secret
+            for s in self.secret_string_loaders:
+                resolved_secret = s.load_secret_string(key)
+                if resolved_secret is not None:
+                    val.set(resolved_secret.value)
+                    setattr(p, key, val)
 
-        # try each loader that we have
-        for s in loader:
-            resolved_value = s.load_string(key)
-            if resolved_value is not None:
-                val.set(resolved_value)
-                setattr(p, key, val)
-                return
+                    # set the value in the safe config dict to the ref,
+                    # as the value is sensitive.
+                    p._safe_config[key] = resolved_secret.ref
+
+                    return
+        else:
+            # the value is not a secret
+            for s in self.string_loaders:
+                resolved_value = s.load_string(key)
+                if resolved_value is not None:
+                    val.set(resolved_value)
+                    setattr(p, key, val)
+
+                    # the value is not sensitive, so it can be shown to users.
+                    p._safe_config[key] = resolved_value
+
+                    return
 
         # if we get here, we didn't find a value for the config variable
         # this is fine if the variable is optional, but otherwise we raise an exception

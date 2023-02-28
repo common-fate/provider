@@ -1,0 +1,30 @@
+{
+  "body": {
+    "config": {},
+    "configValidation": {},
+    "provider": {
+      "name": null,
+      "publisher": null,
+      "version": null
+    },
+    "schema": {
+      "audit": {
+        "resourceLoaders": {},
+        "resources": {}
+      },
+      "config": {},
+      "target": {
+        "Default": {
+          "schema": {
+            "group": {
+              "id": "group",
+              "resourceName": null,
+              "title": null,
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

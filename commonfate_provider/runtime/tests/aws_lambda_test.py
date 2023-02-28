@@ -1,6 +1,15 @@
 import pytest
+from syrupy.extensions.json import JSONSnapshotExtension
+
 from commonfate_provider.runtime import AWSLambdaRuntime
-from commonfate_provider import namespace, provider, access, target
+from commonfate_provider import config, namespace, provider, access, target
+from commonfate_provider.tests import helper
+
+
+@pytest.fixture
+def snapshot_json(snapshot):
+    """use JSON, rather than AmberSnapshotExtension as our schema is serialized as JSON"""
+    return snapshot.use_extension(JSONSnapshotExtension)
 
 
 @pytest.fixture(autouse=True)
@@ -25,13 +34,11 @@ def runtime_fixture():
 
     basic_provider = BasicProvider()
 
-    runtime = AWSLambdaRuntime(
-        provider=basic_provider, config_loader=provider.NoopLoader()
-    )
+    runtime = AWSLambdaRuntime(provider=basic_provider)
     return runtime
 
 
-def test_lambda_handler_works(runtime_fixture):
+def test_lambda_handler_works(runtime_fixture: AWSLambdaRuntime):
     event = {
         "type": "grant",
         "data": {
@@ -42,17 +49,24 @@ def test_lambda_handler_works(runtime_fixture):
     runtime_fixture.handle(event=event, context=None)
 
 
-def test_provider_describe(runtime_fixture):
+def test_provider_describe(runtime_fixture: AWSLambdaRuntime, snapshot_json):
     event = {"type": "describe"}
-    runtime_fixture.handle(event=event, context=None)
+    actual = runtime_fixture.handle(event=event, context=None)
+    assert actual == snapshot_json
 
 
-def test_lambda_runtime_calls_provider_setup():
-    class MyProvider(provider.Provider):
-        def setup(self):
-            self.is_setup = True
+def test_provider_describe_with_config(snapshot_json):
+    class Provider(provider.Provider):
+        api_url = provider.String(usage="API URL")
+        api_key = provider.String(usage="API key", secret=True)
 
-    runtime = AWSLambdaRuntime(
-        provider=MyProvider(), config_loader=provider.NoopLoader()
+    p = helper.initialise_test_provider(
+        {"api_url": "https://example.com", "api_key": "abcdef"}
     )
-    assert runtime.provider.is_setup == True
+    runtime = AWSLambdaRuntime(
+        provider=p, publisher="acmecorp", name="test", version="v0.1.0"
+    )
+
+    event = {"type": "describe"}
+    actual = runtime.handle(event=event, context=None)
+    assert actual == snapshot_json

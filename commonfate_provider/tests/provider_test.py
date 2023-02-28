@@ -13,6 +13,14 @@ def example_provider():
     class ExampleProvider(provider.Provider):
         value = provider.String()
 
+    return ExampleProvider
+
+
+@pytest.fixture
+def provider_with_config_validators():
+    class ExampleProvider(provider.Provider):
+        pass
+
     @provider.config_validator(name="List Users")
     def can_list_users(
         provider: ExampleProvider, diagnostics: diagnostics.Logs
@@ -33,11 +41,9 @@ def test_export_schema_works(example_provider):
     assert got == want
 
 
-def test_provider_config_validation_works(example_provider):
-    config = '{"value": "test"}'
-    ExampleProvider = example_provider
+def test_provider_config_validation_works(provider_with_config_validators):
+    ExampleProvider = provider_with_config_validators
     prov = ExampleProvider()
-    prov._cf_load_config(provider.StringLoader(config))
     got = prov._cf_validate_config()
     want = {
         "can_list_users": {

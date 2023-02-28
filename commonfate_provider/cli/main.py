@@ -3,8 +3,9 @@ import json
 import os
 import pkgutil
 import sys
-from commonfate_provider import config, loader
+from commonfate_provider import config
 from commonfate_provider.runtime.aws_lambda import AWSLambdaRuntime
+from commonfate_provider.runtime.initialise import initialise_provider
 from commonfate_provider.schema import export_schema
 import click
 
@@ -47,19 +48,14 @@ def run(event):
     sys.path.append(parent_folder)
     import_submodules(dirname)
 
-    Provider = loader.load_provider_from_subclass()
-    provider = Provider()
+    provider = initialise_provider(configurer=config.DEV_LOADER)
 
     runtime = AWSLambdaRuntime(
         provider=provider,
-        configurer=config.DEV_LOADER,
-        name="",
-        version="",
-        publisher="",
     )
     event_json = json.loads(event)
     result = runtime.handle(event_json)
-    print(result)
+    print(json.dumps(result))
 
 
 @click.group()

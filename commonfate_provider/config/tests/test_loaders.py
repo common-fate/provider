@@ -13,9 +13,11 @@ def test_env_loader_works():
 def test_dev_env_secret_loader_works():
     loader = loaders.DevEnvSecretLoader()
     os.environ["PROVIDER_SECRET_MY_VALUE"] = "something"
-    got = loader.load_string("my_value")
+    got = loader.load_secret_string("my_value")
 
-    assert got == "something"
+    assert got == loaders.Secret(
+        ref="env://PROVIDER_SECRET_MY_VALUE", value="something"
+    )
 
 
 def test_dict_loader_works():
@@ -23,3 +25,12 @@ def test_dict_loader_works():
     got = loader.load_string("value")
 
     assert got == "something"
+
+
+def test_dict_loader_secrets_works():
+    loader = loaders.DictLoader({"value": "something"})
+    got = loader.load_secret_string("value")
+
+    want = loaders.Secret(ref="dict://value", value="something")
+
+    assert got == want

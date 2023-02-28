@@ -1,8 +1,6 @@
-import os
 import typing
-import json
 from dataclasses import dataclass
-from abc import ABC, abstractmethod
+from abc import ABC
 from commonfate_provider import diagnostics, namespace
 
 
@@ -22,6 +20,10 @@ class String(Field):
 
 
 class Provider(ABC):
+    def __init__(self) -> None:
+        super().__init__()
+        self._safe_config = {}
+
     def __init_subclass__(cls) -> None:
         namespace.register_provider(cls)
         return super().__init_subclass__()

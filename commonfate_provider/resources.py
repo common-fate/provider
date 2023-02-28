@@ -1,5 +1,4 @@
 import typing
-from commonfate_provider.dataclass import ModelMeta
 from commonfate_provider import namespace, tasks
 from pydantic import BaseModel, Field
 import inspect

@@ -1,7 +1,6 @@
+from dataclasses import dataclass
 from commonfate_provider import (
-    config,
     provider,
-    access,
     target,
     resources,
     tasks,
@@ -56,25 +55,12 @@ class Event(BaseModel):
 _T = typing.TypeVar("_T")
 
 
+@dataclass
 class AWSLambdaRuntime:
-    def __init__(
-        self,
-        provider: provider.Provider,
-        configurer: config.Configurer,
-        name: str = "",
-        version: str = "",
-        publisher: str = "",
-    ) -> None:
-        self.provider = provider
-        self.name = name
-        self.version = version
-        self.publisher = publisher
-
-        # load the provider config
-        configurer.configure(provider)
-
-        # call the setup method on the provider to initialise any API clients etc.
-        provider.setup()
+    provider: provider.Provider
+    name: typing.Optional[str] = None
+    version: typing.Optional[str] = None
+    publisher: typing.Optional[str] = None
 
     def handle(self, event, context):
         parsed = Event.parse_obj(event)
@@ -120,7 +106,7 @@ class AWSLambdaRuntime:
                 "name": self.name,
                 "version": self.version,
             }
-            result["config"] = self.provider.config_dict
+            result["config"] = self.provider._safe_config
             result["configValidation"] = self.provider._cf_validate_config()
             result["schema"] = schema.export_schema()
 
