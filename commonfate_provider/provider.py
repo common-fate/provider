@@ -1,3 +1,4 @@
+import os
 import typing
 import json
 from dataclasses import dataclass
@@ -9,6 +10,7 @@ from commonfate_provider import diagnostics, namespace
 class Field:
     usage: typing.Optional[str] = None
     secret: bool = False
+    optional: bool = False
 
 
 class String(Field):
@@ -23,22 +25,6 @@ class ConfigLoader(ABC):
     @abstractmethod
     def load(self) -> dict:
         pass
-
-
-class StringLoader(ConfigLoader):
-    def __init__(self, config_json: str) -> None:
-        self.config = config_json
-
-    def load(self):
-        return json.loads(self.config)
-
-
-class DictLoader(ConfigLoader):
-    def __init__(self, config_dict: dict) -> None:
-        self.config = config_dict
-
-    def load(self):
-        return self.config
 
 
 class NoopLoader(ConfigLoader):
@@ -56,13 +42,12 @@ class Provider(ABC):
         Built-in Provider method to load config from a ConfigLoader.
         """
         self.config_dict = config_loader.load()
-        config_dict = config_loader.load()
         all_vars = [
             (k, v) for (k, v) in vars(self.__class__).items() if not k.startswith("__")
         ]
         for k, v in all_vars:
             if isinstance(v, String):
-                val = config_dict.get(k, "")
+                val = self.config_dict.get(k, "")
                 v.set(val=val)
                 setattr(self, k, v)
 
