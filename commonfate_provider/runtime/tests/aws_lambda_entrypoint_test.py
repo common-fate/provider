@@ -20,6 +20,6 @@ def fresh_namespace():
 #     sys.path = old_path
 
 
-def test_entrypoint_works(dist_module):
+def test_entrypoint_works():
     sys.path.append(path.join(path.dirname(__file__)))
     from commonfate_provider.runtime import aws_lambda_entrypoint
