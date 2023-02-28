@@ -23,29 +23,32 @@ class Provider(ABC):
     def __init__(self) -> None:
         super().__init__()
         self._safe_config = {}
+        """
+        Used internally by the provider library
+        to represent a 'safe' configuration with
+        any secrets censored out and replaced
+        with references.
+        """
+
+        self.diagnostics = diagnostics.Logs()
+        """
+        User-facing log messages associated with
+        a provider.
+
+        If any error messages are logged,
+        the provider will be marked as unhealthy.
+        """
 
     def __init_subclass__(cls) -> None:
         namespace.register_provider(cls)
         return super().__init_subclass__()
 
-    def _cf_validate_config(self) -> dict:
+    def healthy(self) -> bool:
         """
-        Built-in Provider method to validate config.
+        Built-in method to determine whether the provider is
+        healthy and able to receive requests.
         """
-        results = {}
-        all_validators = namespace.get_config_validators()
-        for id, validator in all_validators.items():
-            diags = diagnostics.Logs()
-            try:
-                validator.func(self, diags)
-            except Exception as e:
-                diags.error(str(e))
-
-            results[id] = {
-                "logs": [l.__dict__ for l in diags.logs],
-                "success": diags.succeeded(),
-            }
-        return results
+        return self.diagnostics.has_no_errors()
 
     def setup(self):
         """
@@ -84,7 +87,7 @@ class Provider(ABC):
         return config_vars
 
 
-ConfigValidatorFunc = typing.Callable[[typing.Any, diagnostics.Logs], None]
+ConfigValidatorFunc = typing.Callable[[Provider], None]
 
 
 @dataclass

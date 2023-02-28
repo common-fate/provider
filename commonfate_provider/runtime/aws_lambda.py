@@ -107,7 +107,8 @@ class AWSLambdaRuntime:
                 "version": self.version,
             }
             result["config"] = self.provider._safe_config
-            result["configValidation"] = self.provider._cf_validate_config()
+            result["diagnostics"] = self.provider.diagnostics.logs
+            result["healthy"] = self.provider.diagnostics.has_no_errors()
             result["schema"] = schema.export_schema()
 
             return {"body": result}

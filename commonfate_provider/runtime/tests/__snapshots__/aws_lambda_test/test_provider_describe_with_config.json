@@ -4,7 +4,8 @@
       "api_key": "dict://api_key",
       "api_url": "https://example.com"
     },
-    "configValidation": {},
+    "diagnostics": [],
+    "healthy": true,
     "provider": {
       "name": "test",
       "publisher": "acmecorp",

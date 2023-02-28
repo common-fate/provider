@@ -1,7 +1,8 @@
 {
   "body": {
     "config": {},
-    "configValidation": {},
+    "diagnostics": [],
+    "healthy": true,
     "provider": {
       "name": null,
       "publisher": null,

@@ -1,0 +1,10 @@
+[
+  {
+    "level": "info",
+    "msg": "some message here"
+  },
+  {
+    "level": "error",
+    "msg": "config validation fails failed: something bad happened"
+  }
+]
