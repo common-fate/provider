@@ -2,6 +2,34 @@
 
 Commonfate Provider Core Python Package
 
+## Getting started
+
+```
+poetry install
+```
+
+Open a virtual environment:
+
+```
+poetry shell
+```
+
+## Testing
+
+Run tests:
+
+```
+pytest
+```
+
+This repo uses snapshot testing to verify that the output schema is as expected.
+
+You can update these snapshot tests by running:
+
+```
+pytest --snapshot-update
+```
+
 ## Building a development version
 
 When working on the Common Fate Provider framework it can be useful to use a development build of this package in an Access Provider. To do so run:
