@@ -76,7 +76,7 @@ class Configurer:
             # if we get here, we didn't find a value for the config variable
             # this is fine if the variable is optional, but otherwise we raise an exception
             if val.optional is False:
-                raise ConfigError(f"Provider config {key} is required: {e}")
+                p.diagnostics.error(f"config {key} is required: {e}")
 
 
 DEV_LOADER = Configurer(

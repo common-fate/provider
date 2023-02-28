@@ -54,7 +54,7 @@ def run(event):
         provider=provider,
     )
     event_json = json.loads(event)
-    result = runtime.handle(event_json)
+    result = runtime.handle(event=event_json, context=None)
     print(json.dumps(result))
 
 
