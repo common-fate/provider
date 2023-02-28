@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "commonfate_provider"
 version = "0.1.5"
-description = "This is the core Provider framework on top of which Access Provider are written."
+description = "Python Provider Development kit"
 authors = ["Chris Norman <chris@commonfate.io>", "Manish Chaulagain <manish@commonfate.io>", "Josh Wilkes <josh@commonfate.io>", "Jack Meyer <jack@commonfate.io>", "Jordi Hermoso <jordi@commonfate.io>"]
 readme = "README.md"
 packages = [{include = "commonfate_provider"}]
