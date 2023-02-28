@@ -21,35 +21,10 @@ class String(Field):
         return self._value
 
 
-class ConfigLoader(ABC):
-    @abstractmethod
-    def load(self) -> dict:
-        pass
-
-
-class NoopLoader(ConfigLoader):
-    def load(self):
-        return {}
-
-
 class Provider(ABC):
     def __init_subclass__(cls) -> None:
         namespace.register_provider(cls)
         return super().__init_subclass__()
-
-    def _cf_load_config(self, config_loader: ConfigLoader):
-        """
-        Built-in Provider method to load config from a ConfigLoader.
-        """
-        self.config_dict = config_loader.load()
-        all_vars = [
-            (k, v) for (k, v) in vars(self.__class__).items() if not k.startswith("__")
-        ]
-        for k, v in all_vars:
-            if isinstance(v, String):
-                val = self.config_dict.get(k, "")
-                v.set(val=val)
-                setattr(self, k, v)
 
     def _cf_validate_config(self) -> dict:
         """

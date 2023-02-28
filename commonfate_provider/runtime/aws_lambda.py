@@ -1,4 +1,5 @@
 from commonfate_provider import (
+    config,
     provider,
     access,
     target,
@@ -59,7 +60,7 @@ class AWSLambdaRuntime:
     def __init__(
         self,
         provider: provider.Provider,
-        config_loader: provider.ConfigLoader,
+        configurer: config.Configurer,
         name: str = "",
         version: str = "",
         publisher: str = "",
@@ -70,7 +71,7 @@ class AWSLambdaRuntime:
         self.publisher = publisher
 
         # load the provider config
-        provider._cf_load_config(config_loader=config_loader)
+        configurer.configure(provider)
 
         # call the setup method on the provider to initialise any API clients etc.
         provider.setup()

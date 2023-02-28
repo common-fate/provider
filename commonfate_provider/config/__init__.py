@@ -45,12 +45,12 @@ class Configurer:
         # p.api_url.get()
         ```
         """
-        all_vars = [(k, v) for (k, v) in vars(p).items() if not k.startswith("__")]
+        all_vars = [
+            (k, v) for (k, v) in vars(p.__class__).items() if not k.startswith("__")
+        ]
         for k, v in all_vars:
             if isinstance(v, provider.String):
-                val = self.config_dict.get(k, "")
-                v.set(val=val)
-                setattr(self, k, v)
+                self.resolve_string(p=p, key=k, val=v)
 
     def resolve_string(self, p: provider.Provider, key: str, val: provider.String):
         # switch the loader depending on whether we are trying to get
@@ -72,24 +72,17 @@ class Configurer:
 
 
 DEV_LOADER = Configurer(
-    string_loaders=(loaders.EnvLoader),
-    secret_string_loaders=(loaders.DevEnvSecretLoader),
+    string_loaders=(loaders.EnvLoader(),),
+    secret_string_loaders=(loaders.DevEnvSecretLoader(),),
 )
 """
 used only for local provider development.
 """
 
 AWS_LAMBDA_LOADER = Configurer(
-    string_loaders=(loaders.EnvLoader),
+    string_loaders=(loaders.EnvLoader(),),
     secret_string_loaders=(),  # TODO: add SSM secret loader here
 )
 """
 used in the AWS Lambda runtime.
 """
-
-# class StringLoader(ConfigLoader):
-#     def __init__(self, config_json: str) -> None:
-#         self.config = config_json
-
-#     def load(self):
-#         return json.loads(self.config)

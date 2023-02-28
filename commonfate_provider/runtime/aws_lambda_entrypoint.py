@@ -1,5 +1,5 @@
 import os
-from commonfate_provider import loader
+from commonfate_provider import config, loader
 from commonfate_provider.provider import DictLoader
 from commonfate_provider.runtime import AWSLambdaRuntime
 import importlib.resources
@@ -38,18 +38,6 @@ except ImportError as e:
     )
 
 
-def to_camel_case(snake_str):
-    """
-    Split each word by seperator "_" and capitalize the
-    first letter of each component with '.title()' method and join the result.
-
-    For example, `snake_case` will be converted to `SnakeCase`
-    """
-    components = snake_str.split("_")
-
-    return "".join(x.title() for x in components)
-
-
 def load_metadata_value(provider_data: dict, key: str):
     try:
         val = provider_data[key]
@@ -62,11 +50,6 @@ def load_metadata_value(provider_data: dict, key: str):
 
 Provider = loader.load_provider_from_subclass()
 
-config_dict = {}
-for key in Provider.export_schema():
-    config_dict[key] = os.getenv(to_camel_case(key))
-
-config_loader = DictLoader(config_dict=config_dict)
 provider = Provider()
 
 with importlib.resources.open_text("commonfate_provider_dist", "manifest.json") as file:
@@ -75,7 +58,7 @@ with importlib.resources.open_text("commonfate_provider_dist", "manifest.json") 
 
 runtime = AWSLambdaRuntime(
     provider=provider,
-    config_loader=config_loader,
+    configurer=config.AWS_LAMBDA_LOADER,
     name=load_metadata_value(provider_data, "name"),
     version=load_metadata_value(provider_data, "version"),
     publisher=load_metadata_value(provider_data, "publisher"),

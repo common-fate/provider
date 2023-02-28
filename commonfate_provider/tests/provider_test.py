@@ -26,14 +26,6 @@ def example_provider():
     return ExampleProvider
 
 
-def test_load_config_works(example_provider):
-    config = '{"value": "test"}'
-    ExampleProvider = example_provider
-    got = ExampleProvider()
-    got._cf_load_config(provider.StringLoader(config))
-    assert got.value.get() == "test"
-
-
 def test_export_schema_works(example_provider):
     ExampleProvider = example_provider
     got = ExampleProvider.export_schema()

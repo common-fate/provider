@@ -1,9 +1,6 @@
 import os
 import typing
-import json
-from dataclasses import dataclass
 from abc import ABC, abstractmethod
-from commonfate_provider import diagnostics, namespace
 
 
 class StringLoader(ABC):
@@ -13,7 +10,7 @@ class StringLoader(ABC):
 
 
 class EnvLoader(StringLoader):
-    def load_secret_string(self, field_name: str) -> typing.Optional[str]:
+    def load_string(self, field_name: str) -> typing.Optional[str]:
         """
         The field name is transformed to an env var in the following
         format - `PROVIDER_CONFIG_FIELD_NAME`
