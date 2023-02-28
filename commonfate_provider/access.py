@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import typing_extensions
 import typing
 
-_ALL_TARGETS: typing.Dict[str, typing.Any] = {}
+from commonfate_provider import namespace
 
 
 _T = typing.TypeVar("_T")
@@ -16,7 +16,8 @@ def target(
         nonlocal kind
         if kind is None:
             kind = cls.__name__
-        _ALL_TARGETS[kind] = cls
+
+        namespace.register_target_class(kind, cls)
 
         return cls
 

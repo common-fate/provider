@@ -1,28 +1,37 @@
+import pytest
 from commonfate_provider.runtime import AWSLambdaRuntime
-from commonfate_provider import provider, access, target
+from commonfate_provider import namespace, provider, access, target
 
 
-class BasicProvider(provider.Provider):
-    pass
+@pytest.fixture(autouse=True)
+def fresh_namespace():
+    yield
+    namespace.clear()
 
 
-@access.target(kind="Default")
-class Args:
-    group = target.String()
-    pass
+@pytest.fixture
+def runtime_fixture():
+    class BasicProvider(provider.Provider):
+        pass
+
+    @access.target(kind="Default")
+    class Args:
+        group = target.String()
+        pass
+
+    @access.grant()
+    def grant(p: BasicProvider, subject, args):
+        pass
+
+    basic_provider = BasicProvider()
+
+    runtime = AWSLambdaRuntime(
+        provider=basic_provider, config_loader=provider.NoopLoader()
+    )
+    return runtime
 
 
-@access.grant()
-def grant(p: BasicProvider, subject, args):
-    pass
-
-
-basic_provider = BasicProvider()
-
-runtime = AWSLambdaRuntime(provider=basic_provider, config_loader=provider.NoopLoader())
-
-
-def test_lambda_handler_works():
+def test_lambda_handler_works(runtime_fixture):
     event = {
         "type": "grant",
         "data": {
@@ -30,12 +39,12 @@ def test_lambda_handler_works():
             "target": {"arguments": {"group": "test"}, "kind": "Default"},
         },
     }
-    runtime.handle(event=event, context=None)
+    runtime_fixture.handle(event=event, context=None)
 
 
-def test_provider_describe():
+def test_provider_describe(runtime_fixture):
     event = {"type": "describe"}
-    runtime.handle(event=event, context=None)
+    runtime_fixture.handle(event=event, context=None)
 
 
 def test_lambda_runtime_calls_provider_setup():

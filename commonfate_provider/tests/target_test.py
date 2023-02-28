@@ -8,10 +8,6 @@ class ExampleArgs:
     group = target.String()
 
 
-class BasicProvider(provider.Provider):
-    pass
-
-
 def test_parse_args():
     got_target = target._initialise(ExampleArgs, {"group": "test"})
     assert got_target.group == "test"

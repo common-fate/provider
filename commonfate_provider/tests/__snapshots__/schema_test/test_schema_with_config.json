@@ -1,0 +1,42 @@
+{
+  "audit": {
+    "resourceLoaders": {},
+    "resources": {
+      "ConfigResource": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "some_val": {
+            "title": "Some Val",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "some_val"
+        ],
+        "title": "ConfigResource",
+        "type": "object"
+      }
+    }
+  },
+  "config": {
+    "api_token": {
+      "secret": true,
+      "type": "string",
+      "usage": "API Token"
+    },
+    "some_config": {
+      "secret": false,
+      "type": "string",
+      "usage": "Some config usage"
+    }
+  },
+  "target": {
+    "SomethingElse": {
+      "schema": {}
+    }
+  }
+}

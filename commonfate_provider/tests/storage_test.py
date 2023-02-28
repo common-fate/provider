@@ -1,4 +1,11 @@
-from commonfate_provider import resources
+import pytest
+from commonfate_provider import resources, namespace
+
+
+@pytest.fixture(autouse=True)
+def fresh_namespace():
+    yield
+    namespace.clear()
 
 
 class ExampleResource(resources.Resource):

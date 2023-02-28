@@ -1,6 +1,6 @@
 import typing
 from commonfate_provider.dataclass import ModelMeta
-from commonfate_provider import tasks
+from commonfate_provider import namespace, tasks
 from pydantic import BaseModel, Field
 import inspect
 
@@ -12,20 +12,12 @@ def composite_id(fields: typing.List[str]):
 class Resource(BaseModel):
     id: str
 
-    # def __init__(self, **data: typing.Any) -> None:
-    #     setattr(self, "__dict__", data)
+    def __init_subclass__(cls) -> None:
+        namespace.register_resource_class(cls)
+        return super().__init_subclass__()
 
     def export_json(self) -> dict:
         return {"type": self.__class__.__name__, "data": dict(self)}
-
-    # def __eq__(self, other: typing.Any) -> bool:
-    #     if self.__class__ != other.__class__:
-    #         return False
-    #     return all(self.__dict__[k] == other.__dict__[k] for k in self.__dict__)
-
-    # def __repr__(self) -> str:
-    #     vals = [f"{k}={v}" for (k, v) in self.__dict__.items()]
-    #     return self.__class__.__name__ + "(" + ", ".join(vals) + ")"
 
 
 T = typing.TypeVar("T", bound=Resource)
@@ -39,33 +31,21 @@ def Related(
     return Field(relatedTo=to, title=title, description=description)
 
 
-def Name() -> str:  # type: ignore
-    pass
+# def Name() -> str:  # type: ignore
+#     pass
 
 
-def UserEmail() -> str:  # type: ignore
-    pass
+# def UserEmail() -> str:  # type: ignore
+#     pass
 
 
-_ALL_RESOURCES: typing.List[Resource] = []
-
-
-def _reset():
-    global _ALL_RESOURCES
-    _ALL_RESOURCES = []
-
-
-def get() -> typing.List[Resource]:
-    return _ALL_RESOURCES
-
-
-def set_fixture(resources: typing.List[Resource]):
-    global DEFAULT_STORAGE
-    DEFAULT_STORAGE.resources = [r.export_json() for r in resources]
+# def set_fixture(resources: typing.List[Resource]):
+#     global DEFAULT_STORAGE
+#     DEFAULT_STORAGE.resources = [r.export_json() for r in resources]
 
 
 def fetcher(func: tasks.LoaderFunc):
-    tasks._RESOURCE_LOADERS[func.__name__] = func
+    namespace.register_resource_loader(fetcher)
     return func
 
 
@@ -76,11 +56,11 @@ def audit_schema():
     fetching methods which can be called to fetch them.
     """
     loaders = {}
-    for k in tasks._RESOURCE_LOADERS.keys():
+    for k in namespace.get_resource_loaders().keys():
         loaders[k] = {"title": k}
 
     resources = {}
-    for Klass in Resource.__subclasses__():
+    for Klass in namespace.get_resource_classes():
         properties = {}
         all_vars = [(k, v) for (k, v) in vars(Klass).items() if not k.startswith("__")]
         for k, v in all_vars:
@@ -91,7 +71,7 @@ def audit_schema():
 
 
 def register(resource: Resource):
-    _ALL_RESOURCES.append(resource)
+    namespace._ALL_RESOURCES.append(resource)
 
 
 def without_keys(d, keys):
@@ -114,4 +94,4 @@ class JSONStorage:
         return resources
 
 
-DEFAULT_STORAGE = JSONStorage(resources=[])
+# DEFAULT_STORAGE = JSONStorage(resources=[])

@@ -2,7 +2,7 @@ import typing
 import json
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
-from commonfate_provider import diagnostics
+from commonfate_provider import diagnostics, namespace
 
 
 @dataclass
@@ -51,6 +51,10 @@ class MethodNotImplemented(Exception):
 
 
 class Provider(ABC):
+    def __init_subclass__(cls) -> None:
+        namespace.register_provider(cls)
+        return super().__init_subclass__()
+
     def __init__(self) -> None:
         self._internal_key = "default"
 

@@ -1,0 +1,12 @@
+{
+  "audit": {
+    "resourceLoaders": {},
+    "resources": {}
+  },
+  "config": {},
+  "target": {
+    "SomethingElse": {
+      "schema": {}
+    }
+  }
+}
