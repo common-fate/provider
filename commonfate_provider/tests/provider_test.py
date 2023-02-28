@@ -41,15 +41,6 @@ def test_export_schema_works(example_provider):
     assert got == want
 
 
-def test_capabilities_works():
-    class BasicProvider(provider.Provider):
-        pass
-
-    got = provider.capabilities(_internal_key="BasicProvider")
-    want = {"builtin": {}}
-    assert got == want
-
-
 def test_provider_config_validation_works(example_provider):
     config = '{"value": "test"}'
     ExampleProvider = example_provider

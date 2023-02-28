@@ -46,17 +46,10 @@ class NoopLoader(ConfigLoader):
         return {}
 
 
-class MethodNotImplemented(Exception):
-    pass
-
-
 class Provider(ABC):
     def __init_subclass__(cls) -> None:
         namespace.register_provider(cls)
         return super().__init_subclass__()
-
-    def __init__(self) -> None:
-        self._internal_key = "default"
 
     def _cf_load_config(self, config_loader: ConfigLoader):
         """
@@ -78,15 +71,15 @@ class Provider(ABC):
         Built-in Provider method to validate config.
         """
         results = {}
-        all_validators = _ALL_CONFIG_VALIDATORS.get(self._internal_key, {})
-        for validator in all_validators.values():
+        all_validators = namespace.get_config_validators()
+        for id, validator in all_validators.items():
             diags = diagnostics.Logs()
             try:
                 validator.func(self, diags)
             except Exception as e:
                 diags.error(str(e))
 
-            results[validator.id] = {
+            results[id] = {
                 "logs": [l.__dict__ for l in diags.logs],
                 "success": diags.succeeded(),
             }
@@ -129,33 +122,22 @@ class Provider(ABC):
         return config_vars
 
 
-def capabilities(_internal_key: str = "default") -> dict:
-    return {"builtin": {}}
-
-
 ConfigValidatorFunc = typing.Callable[[typing.Any, diagnostics.Logs], None]
 
 
 @dataclass
 class ConfigValidator:
     name: str
-    id: str
     func: ConfigValidatorFunc
-
-
-_ALL_CONFIG_VALIDATORS: typing.Dict[str, typing.Dict[str, ConfigValidator]] = {}
-"""dict in the format {'default': {'id': {...}}"""
 
 
 def config_validator(
     name: str,
-    _internal_key: str = "default",
 ) -> typing.Callable[[ConfigValidatorFunc], ConfigValidatorFunc]:
     def actual_decorator(func: ConfigValidatorFunc):
         id = func.__name__
-        cv = ConfigValidator(id=id, name=name, func=func)
-        _ALL_CONFIG_VALIDATORS.setdefault(_internal_key, {})
-        _ALL_CONFIG_VALIDATORS[_internal_key][id] = cv
+        cv = ConfigValidator(name=name, func=func)
+        namespace.register_config_validator(id=id, config_validator=cv)
         return func
 
     return actual_decorator

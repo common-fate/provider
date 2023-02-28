@@ -19,7 +19,7 @@ def runtime_fixture():
         group = target.String()
         pass
 
-    @access.grant()
+    @access.grant(kind="Default")
     def grant(p: BasicProvider, subject, args):
         pass
 

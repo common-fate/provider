@@ -16,7 +16,7 @@ def test_target():
 
     targets = namespace.get_target_classes()
 
-    assert targets == {"ExampleTarget": ExampleTarget}
+    assert targets["ExampleTarget"].cls == ExampleTarget
 
 
 def test_target_with_kind():
@@ -26,4 +26,4 @@ def test_target_with_kind():
 
     targets = namespace.get_target_classes()
 
-    assert targets == {"SomethingElse": ExampleTarget}
+    assert targets["SomethingElse"].cls == ExampleTarget

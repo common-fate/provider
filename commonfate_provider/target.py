@@ -72,7 +72,8 @@ def export_schema() -> dict:
     """
     all_targets = {}
 
-    for kind, target_class in namespace.get_target_classes().items():
+    for kind, registered_target in namespace.get_target_classes().items():
+        target_class = registered_target.cls
         target_schema = {}
         all_vars = [
             (k, v) for (k, v) in vars(target_class).items() if not k.startswith("__")

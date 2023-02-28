@@ -81,32 +81,34 @@ class AWSLambdaRuntime:
 
         if isinstance(event, Grant):
             try:
-                target_classes = namespace.get_target_classes()
-                args_cls = target_classes[event.data.target.kind]
+                registered_targets = namespace.get_target_classes()
+                registered_target = registered_targets[event.data.target.kind]
+                args_cls = registered_target.cls
             except KeyError:
-                all_keys = ",".join(target_classes.keys())
+                all_keys = ",".join(registered_targets.keys())
                 raise KeyError(
                     f"unhandled target kind {event.data.target.kind}, supported kinds are [{all_keys}]"
                 )
 
             args = target._initialise(args_cls, event.data.target.arguments)
-            grant = access._get_grant_func()
+            grant = registered_target.get_grant_func()
             grant(self.provider, event.data.subject, args)
             return {"message": "granting access"}
 
         elif isinstance(event, Revoke):
             try:
-                target_classes = namespace.get_target_classes()
-                args_cls = target_classes[event.data.target.kind]
+                registered_targets = namespace.get_target_classes()
+                registered_target = registered_targets[event.data.target.kind]
+                args_cls = registered_target.cls
             except KeyError:
-                all_keys = ",".join(target_classes.keys())
+                all_keys = ",".join(registered_targets.keys())
                 raise KeyError(
                     f"unhandled target kind {event.data.target.kind}, supported kinds are [{all_keys}]"
                 )
 
             args = target._initialise(args_cls, event.data.target.arguments)
 
-            revoke = access._get_revoke_func()
+            revoke = registered_target.get_revoke_func()
             revoke(self.provider, event.data.subject, args)
             return {"message": "revoking access"}
         if isinstance(event, Describe):
