@@ -1,27 +1,75 @@
-# commonfate-provider-core
+# Provider Development Kit
 
-Commonfate Provider Core Python Package
+Provider Development Kit for Python.
 
-## Building a development version
+## What is a provider?
 
-When working on the Common Fate Provider framework it can be useful to use a development build of this package in an Access Provider. To do so run:
+A Provider is a Python service which provides a consistent API for managing fine-grain permissions.
 
+Managing permissions in cloud providers, SaaS applications, and CI/CD platforms usually requires access to highly sensitive secrets, like administrative API tokens. The Provider framework allows for access to be granted and revoked to these platforms without requiring direct access to these tokens:
+
+![diagram of Provider framework](./docs/provider.drawio.svg)
+
+## What does the Provider Development Kit do?
+
+The Provider Development Kit (PDK) makes it easy to develop and deploy Providers.
+
+```python
+class Provider(provider.Provider):
+    api_url = provider.String()
+
+@access.target()
+class Target:
+    ...
+
+@access.grant()
+def grant(p: Provider, subject: str, target: Target):
+    # perform API calls here to grant access
+    ...
+
+@access.revoke()
+def revoke(p: Provider, subject: str, target: Target):
+    # perform API calls here to revoke access
+    ...
 ```
-poetry build
+
+The PDK handles configuration and packaging into a cloud-native function which can be executed by an application.
+
+## Supported runtimes
+
+Currently the supported runtimes for Providers are as follows:
+
+- AWS Lambda
+
+## Provider Schemas
+
+Each Provider has a strongly-typed schema. An example schema is shown below:
+
+```json
+{
+  "audit": {
+    "resourceLoaders": {},
+    "resources": {}
+  },
+  "config": {},
+  "target": {
+    "MyTarget": {
+      "schema": {
+        "first": {
+          "description": "first var",
+          "id": "first",
+          "resourceName": null,
+          "title": "First",
+          "type": "string"
+        }
+      }
+    }
+  }
+}
 ```
 
-which will create a `dist` folder containing the package:
+The schema is based on [JSON Schema](https://json-schema.org/) and allows applications using Providers to interpret
 
-```
-dist
-├── commonfate_provider-0.1.5-py3-none-any.whl
-└── commonfate_provider-0.1.5.tar.gz
-```
+## Applications using the Provider Framework
 
-You can then install this package locally via `pip` in the Access Provider you'd like to use it with:
-
-```bash
-# from the Access Provider repository
-source .venv/bin/activate
-pip install ../commonfate-provider-core/dist/commonfate_provider-0.1.5.tar.gz
-```
+- [Common Fate](https://github.com/common-fate/common-fate)
