@@ -13,8 +13,6 @@ def initialise_test_provider(config_dict: typing.Dict[str, str]) -> provider.Pro
     For use in tests only.
     """
     loader = loaders.DictLoader(config_dict=config_dict)
-    configurer = config.Configurer(
-        string_loaders=(loader,), secret_string_loaders=(loader,)
-    )
+    configurer = config.Configurer(string_loader=loader, secret_string_loader=loader)
 
     return initialise.initialise_provider(configurer=configurer)

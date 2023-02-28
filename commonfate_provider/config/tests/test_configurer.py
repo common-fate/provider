@@ -15,7 +15,7 @@ def test_configurer_works():
         value = provider.String()
 
     loader = loaders.DictLoader({"value": "something"})
-    configurer = config.Configurer(string_loaders=(loader,), secret_string_loaders=())
+    configurer = config.Configurer(string_loader=loader, secret_string_loader=loader)
 
     p = ExampleProvider()
     configurer.configure(p)
@@ -30,7 +30,7 @@ def test_configurer_works_with_secrets():
     loader = loaders.DictLoader({"value": "something"})
     secret_loader = loaders.DictLoader({"value": "something_secret"})
     configurer = config.Configurer(
-        string_loaders=(loader,), secret_string_loaders=(secret_loader,)
+        string_loader=loader, secret_string_loader=secret_loader
     )
 
     p = ExampleProvider()

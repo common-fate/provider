@@ -18,14 +18,14 @@ class Configurer:
     Configures a provider with the `configure()` method.
     """
 
-    string_loaders: typing.Set[loaders.StringLoader]
-    secret_string_loaders: typing.Set[loaders.SecretStringLoader]
+    string_loader: loaders.StringLoader
+    secret_string_loader: loaders.SecretStringLoader
 
     def configure(self, p: provider.Provider):
         """
         Configure a provider. This method looks at the defined fields in the provider class
         and tries to resolve them to actual values. Depending on whether the value
-        is a secret or not, `string_loaders` or `secret_string_loaders` are used.
+        is a secret or not, `string_loader` or `secret_string_loader` is used.
         These are defined when the Configurer is initialised.
 
         Example:
@@ -33,7 +33,7 @@ class Configurer:
         class MyProvider(provider.Provider):
             api_url = provider.String()
 
-        c = Configurer(string_loaders=..., secret_string_loaders=...)
+        c = Configurer(string_loader=..., secret_string_loader=...)
 
         p = MyProvider()
         c.configure(p)
@@ -50,49 +50,48 @@ class Configurer:
                 self.resolve_string(p=p, key=k, val=v)
 
     def resolve_string(self, p: provider.Provider, key: str, val: provider.String):
-        if val.secret is True:
-            # the value is a secret
-            for s in self.secret_string_loaders:
-                resolved_secret = s.load_secret_string(key)
-                if resolved_secret is not None:
-                    val.set(resolved_secret.value)
-                    setattr(p, key, val)
+        try:
+            if val.secret is True:
+                # the value is a secret
+                resolved_secret = self.secret_string_loader.load_secret_string(key)
+                val.set(resolved_secret.value)
+                setattr(p, key, val)
 
-                    # set the value in the safe config dict to the ref,
-                    # as the value is sensitive.
-                    p._safe_config[key] = resolved_secret.ref
+                # set the value in the safe config dict to the ref,
+                # as the value is sensitive.
+                p._safe_config[key] = resolved_secret.ref
+                return
 
-                    return
-        else:
-            # the value is not a secret
-            for s in self.string_loaders:
-                resolved_value = s.load_string(key)
-                if resolved_value is not None:
-                    val.set(resolved_value)
-                    setattr(p, key, val)
+            else:
+                # the value is not a secret
+                resolved_value = self.string_loader.load_string(key)
+                val.set(resolved_value)
+                setattr(p, key, val)
 
-                    # the value is not sensitive, so it can be shown to users.
-                    p._safe_config[key] = resolved_value
+                # the value is not sensitive, so it can be shown to users.
+                p._safe_config[key] = resolved_value
+                return
 
-                    return
-
-        # if we get here, we didn't find a value for the config variable
-        # this is fine if the variable is optional, but otherwise we raise an exception
-        if val.optional is False:
-            raise ConfigError(f"config value {key} is required but was not provided")
+        except loaders.NotFoundError as e:
+            # if we get here, we didn't find a value for the config variable
+            # this is fine if the variable is optional, but otherwise we raise an exception
+            if val.optional is False:
+                raise ConfigError(f"Provider config {key} is required: {e}")
 
 
 DEV_LOADER = Configurer(
-    string_loaders=(loaders.EnvLoader(),),
-    secret_string_loaders=(loaders.DevEnvSecretLoader(),),
+    string_loader=loaders.EnvLoader(),
+    secret_string_loader=loaders.DevEnvSecretLoader(),
 )
 """
 used only for local provider development.
 """
 
 AWS_LAMBDA_LOADER = Configurer(
-    string_loaders=(loaders.EnvLoader(),),
-    secret_string_loaders=(),  # TODO: add SSM secret loader here
+    string_loader=loaders.EnvLoader(),
+    secret_string_loader=loaders.DictLoader(
+        config_dict={}
+    ),  # TODO: add SSM secret loader here
 )
 """
 used in the AWS Lambda runtime.
