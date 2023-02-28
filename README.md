@@ -68,7 +68,7 @@ Each Provider has a strongly-typed schema. An example schema is shown below:
 }
 ```
 
-The schema is based on [JSON Schema](https://json-schema.org/) and allows applications using Providers to interpret
+The schema is based on [JSON Schema](https://json-schema.org/) and allows applications using Providers to interpret the available resources and display the appropriate UI.
 
 ## Applications using the Provider Framework
 
