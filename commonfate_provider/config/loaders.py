@@ -1,6 +1,7 @@
-from dataclasses import dataclass
 import os
-import typing
+import boto3
+from botocore.exceptions import ClientError
+from dataclasses import dataclass
 from abc import ABC, abstractmethod
 
 
@@ -109,3 +110,37 @@ class DictLoader(StringLoader, SecretStringLoader):
             raise NotFoundError(f"secret {field_name} is not set in config_dict")
 
         return Secret(ref=f"dict://{field_name}", value=val)
+
+
+class SSMSecretLoader(SecretStringLoader):
+    """
+    Secret Loader for AWS SSM
+    """
+
+    def load_secret_string(self, field_name: str) -> Secret:
+        """
+        The field name is transformed to an env var in the following
+        format - `PROVIDER_SECRET_FIELD_NAME`
+
+        For example, if the field is `api_token`, the env var will be
+        `PROVIDER_SECRET_API_TOKEN`
+        """
+        env_var = f"PROVIDER_SECRET_{field_name.upper()}"
+
+        secret_path = os.getenv(env_var)
+        if secret_path is None:
+            raise NotFoundError(f"{env_var} environment variable is not set")
+
+        client = boto3.client("ssm")
+        try:
+            res = client.get_parameter(Name=secret_path, WithDecryption=True)
+
+            return Secret(ref=f"{secret_path}", value=res["Parameter"]["Value"])
+
+        except ClientError as e:
+            if e.response["Error"]["Code"] == "ParameterNotFound":
+                raise NotFoundError(
+                    f"The AWS SSM parameter '{secret_path}' was not found"
+                )
+            else:
+                raise e
