@@ -83,7 +83,7 @@ class Configurer:
 
 DEV_LOADER = Configurer(
     string_loader=loaders.EnvLoader(),
-    secret_string_loader=loaders.SSMSecretLoader,
+    secret_string_loader=loaders.DevEnvSecretLoader(),
 )
 """
 used only for local provider development.
