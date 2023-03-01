@@ -81,14 +81,18 @@ class Configurer:
                 p.diagnostics.error(f"config {key} is required: {e}")
 
 
-# used only for local provider development.
 DEV_LOADER = Configurer(
     string_loader=loaders.EnvLoader(),
     secret_string_loader=loaders.SSMSecretLoader,
 )
+"""
+used only for local provider development.
+"""
 
-# used in the AWS Lambda runtime.
 AWS_LAMBDA_LOADER = Configurer(
     string_loader=loaders.EnvLoader(),
     secret_string_loader=loaders.SSMSecretLoader(),
 )
+"""
+used in the AWS Lambda runtime.
+"""

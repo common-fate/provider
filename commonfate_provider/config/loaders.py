@@ -139,6 +139,8 @@ class SSMSecretLoader(SecretStringLoader):
 
         except ClientError as e:
             if e.response["Error"]["Code"] == "ParameterNotFound":
-                print(f"The parameter {secret_path} was not found.")
+                raise NotFoundError(
+                    f"The AWS SSM parameter '{secret_path}' was not found"
+                )
             else:
                 raise e
