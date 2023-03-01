@@ -1,4 +1,11 @@
-from commonfate_provider import resources
+import pytest
+from commonfate_provider import resources, namespace
+
+
+@pytest.fixture(autouse=True)
+def fresh_namespace():
+    yield
+    namespace.clear()
 
 
 class ExampleResource(resources.Resource):
@@ -10,13 +17,3 @@ def test_resource_equality():
     second = ExampleResource(id="test", value="test")
     assert first.__eq__ is not None
     assert first == second
-
-
-def test_json_storage_works():
-    js = resources.JSONStorage(
-        resources=[{"type": "ExampleResource", "data": {"id": "test", "value": "test"}}]
-    )
-
-    want = [ExampleResource(id="test", value="test")]
-    got = js.all(ExampleResource)
-    assert want == got

@@ -1,28 +1,44 @@
+import pytest
+from syrupy.extensions.json import JSONSnapshotExtension
+
 from commonfate_provider.runtime import AWSLambdaRuntime
-from commonfate_provider import provider, access, target
+from commonfate_provider import config, namespace, provider, access, target
+from commonfate_provider.tests import helper
 
 
-class BasicProvider(provider.Provider):
-    pass
+@pytest.fixture
+def snapshot_json(snapshot):
+    """use JSON, rather than AmberSnapshotExtension as our schema is serialized as JSON"""
+    return snapshot.use_extension(JSONSnapshotExtension)
 
 
-@access.target(kind="Default")
-class Args:
-    group = target.String()
-    pass
+@pytest.fixture(autouse=True)
+def fresh_namespace():
+    yield
+    namespace.clear()
 
 
-@access.grant()
-def grant(p: BasicProvider, subject, args):
-    pass
+@pytest.fixture
+def runtime_fixture():
+    class BasicProvider(provider.Provider):
+        pass
+
+    @access.target(kind="Default")
+    class Args:
+        group = target.String()
+        pass
+
+    @access.grant(kind="Default")
+    def grant(p: BasicProvider, subject, args):
+        pass
+
+    basic_provider = BasicProvider()
+
+    runtime = AWSLambdaRuntime(provider=basic_provider)
+    return runtime
 
 
-basic_provider = BasicProvider()
-
-runtime = AWSLambdaRuntime(provider=basic_provider, config_loader=provider.NoopLoader())
-
-
-def test_lambda_handler_works():
+def test_lambda_handler_works(runtime_fixture: AWSLambdaRuntime):
     event = {
         "type": "grant",
         "data": {
@@ -30,20 +46,45 @@ def test_lambda_handler_works():
             "target": {"arguments": {"group": "test"}, "kind": "Default"},
         },
     }
-    runtime.handle(event=event, context=None)
+    runtime_fixture.handle(event=event, context=None)
 
 
-def test_provider_describe():
+def test_provider_describe(runtime_fixture: AWSLambdaRuntime, snapshot_json):
     event = {"type": "describe"}
-    runtime.handle(event=event, context=None)
+    actual = runtime_fixture.handle(event=event, context=None)
+    assert actual == snapshot_json
 
 
-def test_lambda_runtime_calls_provider_setup():
-    class MyProvider(provider.Provider):
-        def setup(self):
-            self.is_setup = True
+def test_provider_describe_with_config(snapshot_json):
+    class Provider(provider.Provider):
+        api_url = provider.String(usage="API URL")
+        api_key = provider.String(usage="API key", secret=True)
 
-    runtime = AWSLambdaRuntime(
-        provider=MyProvider(), config_loader=provider.NoopLoader()
+    p = helper.initialise_test_provider(
+        {"api_url": "https://example.com", "api_key": "abcdef"}
     )
-    assert runtime.provider.is_setup == True
+    runtime = AWSLambdaRuntime(
+        provider=p, publisher="acmecorp", name="test", version="v0.1.0"
+    )
+
+    event = {"type": "describe"}
+    actual = runtime.handle(event=event, context=None)
+    assert actual == snapshot_json
+
+
+def test_provider_describe_with_errors(snapshot_json):
+    class Provider(provider.Provider):
+        api_url = provider.String(usage="API URL")
+        api_key = provider.String(usage="API key", secret=True)
+
+    p = helper.initialise_test_provider(
+        {"api_url": "https://example.com", "api_key": "abcdef"}
+    )
+    runtime = AWSLambdaRuntime(
+        provider=p, publisher="acmecorp", name="test", version="v0.1.0"
+    )
+    p.diagnostics.error("some error happened!")
+
+    event = {"type": "describe"}
+    actual = runtime.handle(event=event, context=None)
+    assert actual == snapshot_json

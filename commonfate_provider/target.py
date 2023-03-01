@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import typing
-from commonfate_provider import resources
+from commonfate_provider import namespace, resources
 
 
 class ParseError(Exception):
@@ -47,7 +47,7 @@ class Resource(Field):
     resource: typing.Optional[resources.Resource] = None
 
 
-def export_schema(kind: str, cls: typing.Type) -> dict:
+def export_schema() -> dict:
     """
     Exports the target schema defined in an Target class
     to a dictionary.
@@ -70,44 +70,52 @@ def export_schema(kind: str, cls: typing.Type) -> dict:
     }
     ```
     """
-    target_schema = {}
-    all_vars = [(k, v) for (k, v) in vars(cls).items() if not k.startswith("__")]
-    for k, v in all_vars:
-        if type(v) == String:
-            val: String = v
-            schema = {
-                "id": k,
-                "type": "string",
-                "title": val.title,
-                "resourceName": None,
-            }
-            if val.description is not None:
-                schema["description"] = val.description
+    all_targets = {}
 
-            target_schema[k] = schema
-        if type(v) == Resource:
-            val: Resource = v
-            schema = {
-                "id": k,
-                "type": "string",
-                "title": val.title,
-                "resourceName": val.resource.__name__,
-            }
+    for kind, registered_target in namespace.get_target_classes().items():
+        target_class = registered_target.cls
+        target_schema = {}
+        all_vars = [
+            (k, v) for (k, v) in vars(target_class).items() if not k.startswith("__")
+        ]
+        for k, v in all_vars:
+            if type(v) == String:
+                val: String = v
+                schema = {
+                    "id": k,
+                    "type": "string",
+                    "title": val.title,
+                    "resourceName": None,
+                }
+                if val.description is not None:
+                    schema["description"] = val.description
 
-            if val.resource is not None:
-                properties = {}
-                all_vars = [
-                    (k2, v)
-                    for (k2, v) in vars(val.resource).items()
-                    if not k2.startswith("__")
-                ]
-                for k3, v in all_vars:
-                    properties[k3] = {"type": "string"}
-                schema["resource"] = val.resource.schema()
+                target_schema[k] = schema
+            if type(v) == Resource:
+                val: Resource = v
+                schema = {
+                    "id": k,
+                    "type": "string",
+                    "title": val.title,
+                    "resourceName": val.resource.__name__,
+                }
 
-            if val.description is not None:
-                schema["description"] = val.description
+                if val.resource is not None:
+                    properties = {}
+                    all_vars = [
+                        (k2, v)
+                        for (k2, v) in vars(val.resource).items()
+                        if not k2.startswith("__")
+                    ]
+                    for k3, v in all_vars:
+                        properties[k3] = {"type": "string"}
+                    schema["resource"] = val.resource.schema()
 
-            target_schema[k] = schema
+                if val.description is not None:
+                    schema["description"] = val.description
 
-    return {kind: {"schema": target_schema}}
+                target_schema[k] = schema
+
+        all_targets[kind] = {"schema": target_schema}
+
+    return all_targets

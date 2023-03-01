@@ -1,4 +1,12 @@
-from commonfate_provider import provider, access, target, resources, tasks
+from dataclasses import dataclass
+from commonfate_provider import (
+    provider,
+    target,
+    resources,
+    tasks,
+    namespace,
+    schema,
+)
 import typing
 
 from pydantic import BaseModel, Field
@@ -47,25 +55,12 @@ class Event(BaseModel):
 _T = typing.TypeVar("_T")
 
 
+@dataclass
 class AWSLambdaRuntime:
-    def __init__(
-        self,
-        provider: provider.Provider,
-        config_loader: provider.ConfigLoader,
-        name: str = "",
-        version: str = "",
-        publisher: str = "",
-    ) -> None:
-        self.provider = provider
-        self.name = name
-        self.version = version
-        self.publisher = publisher
-
-        # load the provider config
-        provider._cf_load_config(config_loader=config_loader)
-
-        # call the setup method on the provider to initialise any API clients etc.
-        provider.setup()
+    provider: provider.Provider
+    name: typing.Optional[str] = None
+    version: typing.Optional[str] = None
+    publisher: typing.Optional[str] = None
 
     def handle(self, event, context):
         parsed = Event.parse_obj(event)
@@ -73,30 +68,34 @@ class AWSLambdaRuntime:
 
         if isinstance(event, Grant):
             try:
-                args_cls = access._ALL_TARGETS[event.data.target.kind]
+                registered_targets = namespace.get_target_classes()
+                registered_target = registered_targets[event.data.target.kind]
+                args_cls = registered_target.cls
             except KeyError:
-                all_keys = ",".join(access._ALL_TARGETS.keys())
+                all_keys = ",".join(registered_targets.keys())
                 raise KeyError(
                     f"unhandled target kind {event.data.target.kind}, supported kinds are [{all_keys}]"
                 )
 
             args = target._initialise(args_cls, event.data.target.arguments)
-            grant = access._get_grant_func()
+            grant = registered_target.get_grant_func()
             grant(self.provider, event.data.subject, args)
             return {"message": "granting access"}
 
         elif isinstance(event, Revoke):
             try:
-                args_cls = access._ALL_TARGETS[event.data.target.kind]
+                registered_targets = namespace.get_target_classes()
+                registered_target = registered_targets[event.data.target.kind]
+                args_cls = registered_target.cls
             except KeyError:
-                all_keys = ",".join(access._ALL_TARGETS.keys())
+                all_keys = ",".join(registered_targets.keys())
                 raise KeyError(
                     f"unhandled target kind {event.data.target.kind}, supported kinds are [{all_keys}]"
                 )
 
             args = target._initialise(args_cls, event.data.target.arguments)
 
-            revoke = access._get_revoke_func()
+            revoke = registered_target.get_revoke_func()
             revoke(self.provider, event.data.subject, args)
             return {"message": "revoking access"}
         if isinstance(event, Describe):
@@ -107,18 +106,10 @@ class AWSLambdaRuntime:
                 "name": self.name,
                 "version": self.version,
             }
-            result["config"] = self.provider.config_dict
-            result["configValidation"] = self.provider._cf_validate_config()
-            result["schema"] = {}
-
-            # in future we'll handle multiple kinds of targets,
-            # but for now, just get the first one
-            target_kind = next(iter(access._ALL_TARGETS))
-            target_class = access._ALL_TARGETS[target_kind]
-
-            result["schema"]["target"] = target.export_schema(target_kind, target_class)
-            result["schema"]["audit"] = resources.audit_schema()
-            result["schema"]["config"] = self.provider.export_schema()
+            result["config"] = self.provider._safe_config
+            result["diagnostics"] = self.provider.diagnostics.export_logs()
+            result["healthy"] = self.provider.diagnostics.has_no_errors()
+            result["schema"] = schema.export_schema()
 
             return {"body": result}
 

@@ -1,23 +1,29 @@
-from commonfate_provider import access
+import pytest
+from commonfate_provider import access, namespace
+
+
+@pytest.fixture(autouse=True)
+def fresh_namespace():
+    """clear the registered provider, targets etc between test runs"""
+    yield
+    namespace.clear()
 
 
 def test_target():
-    # reset the registered targets
-    access._ALL_TARGETS = {}
-
     @access.target()
     class ExampleTarget:
         pass
 
-    assert access._ALL_TARGETS == {"ExampleTarget": ExampleTarget}
+    targets = namespace.get_target_classes()
+
+    assert targets["ExampleTarget"].cls == ExampleTarget
 
 
 def test_target_with_kind():
-    # reset the registered targets
-    access._ALL_TARGETS = {}
-
     @access.target(kind="SomethingElse")
     class ExampleTarget:
         pass
 
-    assert access._ALL_TARGETS == {"SomethingElse": ExampleTarget}
+    targets = namespace.get_target_classes()
+
+    assert targets["SomethingElse"].cls == ExampleTarget

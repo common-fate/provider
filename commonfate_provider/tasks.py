@@ -1,24 +1,11 @@
 import typing
 from commonfate_provider import provider
-from dataclasses import dataclass
-from typing import Dict, Protocol
-from inspect import signature
-import abc
 
 from commonfate_provider.dataclass import ModelMeta
 
 
-class DataClass(Protocol):
-    # https://stackoverflow.com/questions/54668000/type-hint-for-an-instance-of-a-non-specific-dataclass
-    __dataclass_fields__: Dict
-
-
-DC = typing.TypeVar("DC", bound=DataClass)
-
 LoaderFunc = typing.Callable[[typing.Any], None]
 
-
-_RESOURCE_LOADERS: typing.Dict[str, LoaderFunc] = {}
 
 P = typing.TypeVar("P", bound=provider.Provider)
 
