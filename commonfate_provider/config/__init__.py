@@ -1,4 +1,6 @@
 import typing
+import boto3
+from botocore.exceptions import ClientError
 from dataclasses import dataclass
 from commonfate_provider.config import loaders
 from commonfate_provider import provider
@@ -79,20 +81,14 @@ class Configurer:
                 p.diagnostics.error(f"config {key} is required: {e}")
 
 
+# used only for local provider development.
 DEV_LOADER = Configurer(
     string_loader=loaders.EnvLoader(),
-    secret_string_loader=loaders.DevEnvSecretLoader(),
+    secret_string_loader=loaders.SSMSecretLoader,
 )
-"""
-used only for local provider development.
-"""
 
+# used in the AWS Lambda runtime.
 AWS_LAMBDA_LOADER = Configurer(
     string_loader=loaders.EnvLoader(),
-    secret_string_loader=loaders.DictLoader(
-        config_dict={}
-    ),  # TODO: add SSM secret loader here
+    secret_string_loader=loaders.SSMSecretLoader(),
 )
-"""
-used in the AWS Lambda runtime.
-"""
