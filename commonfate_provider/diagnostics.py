@@ -4,7 +4,7 @@ import typing
 
 @dataclass
 class Log:
-    level: typing.Literal["info", "error"]
+    level: typing.Literal["INFO", "ERROR"]
     msg: str
 
 
@@ -15,13 +15,13 @@ class Logs:
         self.logs = []
 
     def info(self, msg: str):
-        self.logs.append(Log("info", msg=msg))
+        self.logs.append(Log("INFO", msg=msg))
 
     def error(self, msg: str):
-        self.logs.append(Log("error", msg=msg))
+        self.logs.append(Log("ERROR", msg=msg))
 
     def has_no_errors(self) -> bool:
-        has_error = any([l for l in self.logs if l.level == "error"])
+        has_error = any([l for l in self.logs if l.level == "ERROR"])
         return not has_error
 
     def export_logs(self) -> typing.List[dict]:
