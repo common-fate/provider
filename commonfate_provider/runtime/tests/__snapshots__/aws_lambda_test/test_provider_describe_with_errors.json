@@ -6,7 +6,7 @@
     },
     "diagnostics": [
       {
-        "level": "error",
+        "level": "ERROR",
         "msg": "some error happened!"
       }
     ],
