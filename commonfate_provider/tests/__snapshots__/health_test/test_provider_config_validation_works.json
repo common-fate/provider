@@ -1,10 +1,10 @@
 [
   {
-    "level": "info",
+    "level": "INFO",
     "msg": "some message here"
   },
   {
-    "level": "error",
+    "level": "ERROR",
     "msg": "config validation fails failed: something bad happened"
   }
 ]
