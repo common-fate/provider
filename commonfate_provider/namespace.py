@@ -90,7 +90,7 @@ def register_grant_func(kind: KindType, func: "GrantFunc"):
 
 def register_revoke_func(kind: KindType, func: "RevokeFunc"):
     kind_str = _lookup_kind(kind=kind, function_type="revoke function")
-    _TARGET_CLASSES[kind_str].revoke = func
+    _TARGET_CLASSES[kind_str].revoke_func = func
 
 
 def _lookup_kind(kind: KindType, function_type: str) -> str:
