@@ -14,8 +14,9 @@ def export_schema() -> dict:
     commonfateProviderCoreVerison = None
     try:
         commonfateProviderCoreVerison = get_distribution("commonfate_provider").version
-    except:
-        print("unable to determine the commonfate_provider package version")
+    except Exception as e:
+        print("unable to determine the commonfate_provider package version", e)
+        commonfateProviderCoreVerison = "undefined"
 
     schema["target"] = target.export_schema()
     schema["config"] = Provider.export_schema()
