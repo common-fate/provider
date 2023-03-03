@@ -109,7 +109,7 @@ class AWSLambdaRuntime:
             result["config"] = self.provider._safe_config
             result["diagnostics"] = self.provider.diagnostics.export_logs()
             result["healthy"] = self.provider.diagnostics.has_no_errors()
-            result["schema"] = schema.export_schema().dict()
+            result["schema"] = schema.export_schema().dict(exclude_none=True)
 
             return {"body": result}
 

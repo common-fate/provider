@@ -39,7 +39,7 @@ def schema():
     sys.path.append(parent_folder)
     import_submodules(dirname)
 
-    schema = export_schema().dict()
+    schema = export_schema().dict(exclude_none=True)
     print(json.dumps(schema))
 
 

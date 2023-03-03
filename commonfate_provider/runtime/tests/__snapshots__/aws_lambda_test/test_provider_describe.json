@@ -22,9 +22,6 @@
         "Default": {
           "properties": {
             "group": {
-              "description": null,
-              "resource": null,
-              "title": null,
               "type": "string"
             }
           },
