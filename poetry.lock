@@ -113,7 +113,7 @@ python-versions = "*"
 
 [[package]]
 name = "common-fate-schema"
-version = "0.5.1"
+version = "0.6.0"
 description = "Common Fate core schema types"
 category = "main"
 optional = false
@@ -412,7 +412,7 @@ testing = ["coverage (>=6.2)", "coverage-enable-subprocess (>=1)", "flaky (>=3.7
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "2e189d034706fffa43ea11ed46241f1cda94ccc860a7e86ae7ea2238b9a706e1"
+content-hash = "e07369a03b440713549f45d8329bdc44d2af90665bd069a2e6863bece562556f"
 
 [metadata.files]
 attrs = [
@@ -474,8 +474,8 @@ colored = [
     {file = "colored-1.4.4.tar.gz", hash = "sha256:04ff4d4dd514274fe3b99a21bb52fb96f2688c01e93fba7bef37221e7cb56ce0"},
 ]
 common-fate-schema = [
-    {file = "common_fate_schema-0.5.1-py3-none-any.whl", hash = "sha256:3b76adcb5c06b2fb83fd85449273edc179e98b6ecc99797d866e020bace4ce2e"},
-    {file = "common_fate_schema-0.5.1.tar.gz", hash = "sha256:76a7b5ee714473cfb3b9de87a965d9b620f2efd589283006db657f34360315a7"},
+    {file = "common_fate_schema-0.6.0-py3-none-any.whl", hash = "sha256:21aeae36aa3ffdeba8b5a644edf9ed38db90922922e3c04f2e63d336af33d084"},
+    {file = "common_fate_schema-0.6.0.tar.gz", hash = "sha256:8e8071941ac5e03c0e16a58777524934da053553dfe40800abe9491d3f62b8e3"},
 ]
 distlib = [
     {file = "distlib-0.3.6-py2.py3-none-any.whl", hash = "sha256:f35c4b692542ca110de7ef0bea44d73981caeb34ca0b9b6b2e6d7790dda8f80e"},
