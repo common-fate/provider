@@ -31,7 +31,7 @@ def Related(
 
 
 def fetcher(func: tasks.LoaderFunc):
-    namespace.register_resource_loader(fetcher)
+    namespace.register_resource_loader(func)
     return func
 
 
@@ -59,6 +59,11 @@ def audit_schema():
 def register(resource: Resource):
     namespace._ALL_RESOURCES.append(resource)
 
+def get()->typing.List[Resource]:
+    return namespace._ALL_RESOURCES
+
+def _reset():
+    namespace._ALL_RESOURCES = []
 
 def without_keys(d, keys):
     return {x: d[x] for x in d if x not in keys}
