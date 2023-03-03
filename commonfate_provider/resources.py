@@ -2,6 +2,7 @@ import typing
 from commonfate_provider import namespace, tasks
 from pydantic import BaseModel, Field
 import inspect
+from common_fate_schema.provider import v1alpha1
 
 
 def composite_id(fields: typing.List[str]):
@@ -35,35 +36,38 @@ def fetcher(func: tasks.LoaderFunc):
     return func
 
 
-def audit_schema():
+def export_schema() -> v1alpha1.Resources:
     """
-    Returns the schema for the 'audit' section in a provider schema as a dict.
+    Returns the schema for the 'resources' section in a provider schema as a dict.
     This section defines the resources the provider can read, along with the
     fetching methods which can be called to fetch them.
     """
-    loaders = {}
+    loaders: typing.Dict[str, v1alpha1.Loader] = {}
     for k in namespace.get_resource_loaders().keys():
-        loaders[k] = {"title": k}
+        loaders[k] = v1alpha1.Loader(title=k)
 
-    resources = {}
+    resources = v1alpha1.Resources(loaders=loaders, types={})
     for Klass in namespace.get_resource_classes():
         properties = {}
         all_vars = [(k, v) for (k, v) in vars(Klass).items() if not k.startswith("__")]
         for k, v in all_vars:
             properties[k] = {"type": "string"}
-        resources[Klass.__name__] = Klass.schema()
+        resources.types[Klass.__name__] = Klass.schema()
 
-    return {"resourceLoaders": loaders, "resources": resources}
+    return resources
 
 
 def register(resource: Resource):
     namespace._ALL_RESOURCES.append(resource)
 
-def get()->typing.List[Resource]:
+
+def get() -> typing.List[Resource]:
     return namespace._ALL_RESOURCES
+
 
 def _reset():
     namespace._ALL_RESOURCES = []
+
 
 def without_keys(d, keys):
     return {x: d[x] for x in d if x not in keys}

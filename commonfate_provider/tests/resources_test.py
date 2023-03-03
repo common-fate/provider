@@ -32,5 +32,5 @@ def load_resources():
 
 
 def test_resource_schema_works(snapshot_json):
-    got = resources.audit_schema()
-    assert got == snapshot_json
+    got = resources.export_schema()
+    assert got.dict() == snapshot_json

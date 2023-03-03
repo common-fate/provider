@@ -1,6 +1,7 @@
 import pytest
-from commonfate_provider import namespace, target, access, resources
-from commonfate_provider import provider
+from syrupy.extensions.json import JSONSnapshotExtension
+
+from commonfate_provider import access, namespace, resources, target
 
 
 @pytest.fixture(autouse=True)
@@ -8,6 +9,12 @@ def fresh_namespace():
     """clear the registered provider, targets etc between test runs"""
     yield
     namespace.clear()
+
+
+@pytest.fixture
+def snapshot_json(snapshot):
+    """use JSON, rather than AmberSnapshotExtension as our schema is serialized as JSON"""
+    return snapshot.use_extension(JSONSnapshotExtension)
 
 
 @access.target()
@@ -25,63 +32,27 @@ def test_parse_args_missing_required():
         target._initialise(ExampleArgs, {})
 
 
-def test_export_target_schema():
+def test_export_target_schema(snapshot_json):
     @access.target()
     class ExampleTarget:
         my_property = target.String(title="MyProperty")
 
     got = target.export_schema()
+    got_dict = {k: v.dict() for k, v in got.items()}
 
-    want = {
-        "ExampleTarget": {
-            "schema": {
-                "my_property": {
-                    "id": "my_property",
-                    "resourceName": None,
-                    "title": "MyProperty",
-                    "type": "string",
-                }
-            }
-        }
-    }
-
-    assert want == got
+    assert got_dict == snapshot_json
 
 
-def test_export_target_resource_schema():
+def test_export_target_resource_schema(snapshot_json):
     class MyResource(resources.Resource):
         pass
 
     @access.target()
     class ExampleTarget:
-        my_property = target.String(title="MyProperty")
-        my_resource = target.Resource(title="MyResource", resource=MyResource)
+        my_property = target.String(title="MyProperty", description="some description")
+        my_resource = target.Resource(title="MyResourceField", resource=MyResource)
 
     got = target.export_schema()
+    got_dict = {k: v.dict() for k, v in got.items()}
 
-    want = {
-        "ExampleTarget": {
-            "schema": {
-                "my_property": {
-                    "id": "my_property",
-                    "resourceName": None,
-                    "title": "MyProperty",
-                    "type": "string",
-                },
-                "my_resource": {
-                    "id": "my_resource",
-                    "resource": {
-                        "properties": {"id": {"title": "Id", "type": "string"}},
-                        "required": ["id"],
-                        "type": "object",
-                        "title": "MyResource",
-                    },
-                    "title": "MyResource",
-                    "resourceName": "MyResource",
-                    "type": "string",
-                },
-            }
-        }
-    }
-
-    assert want == got
+    assert got_dict == snapshot_json

@@ -18,6 +18,6 @@ def example_provider():
 
 def test_export_schema_works(example_provider):
     ExampleProvider = example_provider
-    got = ExampleProvider.export_schema()
-    want = {"value": {"type": "string", "usage": None, "secret": False}}
+    got = ExampleProvider.export_config_schema()
+    want = {"value": {"type": "string", "description": None, "secret": False}}
     assert got == want

@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import typing
 from commonfate_provider import namespace, resources
+from common_fate_schema.provider import v1alpha1
 
 
 class ParseError(Exception):
@@ -47,7 +48,7 @@ class Resource(Field):
     resource: typing.Optional[resources.Resource] = None
 
 
-def export_schema() -> dict:
+def export_schema() -> typing.Dict[str, v1alpha1.Target]:
     """
     Exports the target schema defined in an Target class
     to a dictionary.
@@ -70,25 +71,23 @@ def export_schema() -> dict:
     }
     ```
     """
-    all_targets = {}
+    all_targets: typing.Dict[str, v1alpha1.Target] = {}
 
     for kind, registered_target in namespace.get_target_classes().items():
         target_class = registered_target.cls
-        target_schema = {}
+        target_schema: typing.Dict[str, v1alpha1.TargetField] = {}
         all_vars = [
             (k, v) for (k, v) in vars(target_class).items() if not k.startswith("__")
         ]
         for k, v in all_vars:
             if type(v) == String:
                 val: String = v
-                schema = {
-                    "id": k,
-                    "type": "string",
-                    "title": val.title,
-                    "resourceName": None,
-                }
-                if val.description is not None:
-                    schema["description"] = val.description
+                schema = v1alpha1.TargetField(
+                    title=val.title,
+                    type="string",
+                    resource=None,
+                    description=val.description,
+                )
 
                 target_schema[k] = schema
             if type(v) == Resource:
@@ -100,22 +99,15 @@ def export_schema() -> dict:
                     "resourceName": val.resource.__name__,
                 }
 
-                if val.resource is not None:
-                    properties = {}
-                    all_vars = [
-                        (k2, v)
-                        for (k2, v) in vars(val.resource).items()
-                        if not k2.startswith("__")
-                    ]
-                    for k3, v in all_vars:
-                        properties[k3] = {"type": "string"}
-                    schema["resource"] = val.resource.schema()
-
-                if val.description is not None:
-                    schema["description"] = val.description
+                schema = v1alpha1.TargetField(
+                    title=val.title,
+                    type="string",
+                    resource=val.resource.__name__,
+                    description=val.description,
+                )
 
                 target_schema[k] = schema
 
-        all_targets[kind] = {"schema": target_schema}
+        all_targets[kind] = v1alpha1.Target(type="object", properties=target_schema)
 
     return all_targets
