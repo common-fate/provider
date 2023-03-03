@@ -109,7 +109,7 @@ class AWSLambdaRuntime:
             result["config"] = self.provider._safe_config
             result["diagnostics"] = self.provider.diagnostics.export_logs()
             result["healthy"] = self.provider.diagnostics.has_no_errors()
-            result["schema"] = schema.export_schema()
+            result["schema"] = schema.export_schema().dict()
 
             return {"body": result}
 
@@ -122,10 +122,9 @@ class AWSLambdaRuntime:
             # find the resources and pending tasks, and return them
             found = resources.get()
             pending_tasks = tasks.get()
-            print(found)
             response = {
                 "resources": [r.export_json() for r in found],
-                "pendingTasks": [t.json() for t in pending_tasks],
+                "tasks": [t.json() for t in pending_tasks],
             }
             print(response)
             return {"body": response}

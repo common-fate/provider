@@ -2,11 +2,12 @@ import typing
 from dataclasses import dataclass
 from abc import ABC
 from commonfate_provider import diagnostics, namespace
+from common_fate_schema.provider import v1alpha1
 
 
 @dataclass
 class Field:
-    usage: typing.Optional[str] = None
+    description: typing.Optional[str] = None
     secret: bool = False
     optional: bool = False
 
@@ -57,7 +58,7 @@ class Provider(ABC):
         pass
 
     @classmethod
-    def export_schema(cls) -> dict:
+    def export_config_schema(cls) -> typing.Dict[str, v1alpha1.Config]:
         """
         Exports config variables defined in a Provider class
         to a dictionary.
@@ -79,11 +80,9 @@ class Provider(ABC):
             if type(v) == String:
                 val: String = v
 
-                config_vars[k] = {
-                    "type": "string",
-                    "usage": val.usage,
-                    "secret": val.secret,
-                }
+                config_vars[k] = v1alpha1.Config(
+                    type="string", description=val.description, secret=val.secret
+                )
         return config_vars
 
 

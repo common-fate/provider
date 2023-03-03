@@ -17,27 +17,27 @@
       "version": "v0.1.0"
     },
     "schema": {
-      "audit": {
-        "resourceLoaders": {},
-        "resources": {}
-      },
+      "$schema": "https://schema.commonfate.io/provider/v1alpha1",
       "config": {
         "api_key": {
+          "description": "API key",
           "secret": true,
-          "type": "string",
-          "usage": "API key"
+          "type": "string"
         },
         "api_url": {
+          "description": "API URL",
           "secret": false,
-          "type": "string",
-          "usage": "API URL"
+          "type": "string"
         }
       },
       "meta": {
-        "commonfateProviderCoreVersion": "0.1.5",
-        "schemaVersion": 1
+        "framework": "0.1.5"
       },
-      "target": {}
+      "resources": {
+        "loaders": {},
+        "types": {}
+      },
+      "targets": {}
     }
   }
 }

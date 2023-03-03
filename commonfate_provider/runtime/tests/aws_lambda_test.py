@@ -57,8 +57,8 @@ def test_provider_describe(runtime_fixture: AWSLambdaRuntime, snapshot_json):
 
 def test_provider_describe_with_config(snapshot_json):
     class Provider(provider.Provider):
-        api_url = provider.String(usage="API URL")
-        api_key = provider.String(usage="API key", secret=True)
+        api_url = provider.String(description="API URL")
+        api_key = provider.String(description="API key", secret=True)
 
     p = helper.initialise_test_provider(
         {"api_url": "https://example.com", "api_key": "abcdef"}
@@ -74,8 +74,8 @@ def test_provider_describe_with_config(snapshot_json):
 
 def test_provider_describe_with_errors(snapshot_json):
     class Provider(provider.Provider):
-        api_url = provider.String(usage="API URL")
-        api_key = provider.String(usage="API key", secret=True)
+        api_url = provider.String(description="API URL")
+        api_key = provider.String(description="API key", secret=True)
 
     p = helper.initialise_test_provider(
         {"api_url": "https://example.com", "api_key": "abcdef"}

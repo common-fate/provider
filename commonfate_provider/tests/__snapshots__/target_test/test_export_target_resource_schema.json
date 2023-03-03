@@ -1,0 +1,19 @@
+{
+  "ExampleTarget": {
+    "properties": {
+      "my_property": {
+        "description": "some description",
+        "resource": null,
+        "title": "MyProperty",
+        "type": "string"
+      },
+      "my_resource": {
+        "description": null,
+        "resource": "MyResource",
+        "title": "MyResourceField",
+        "type": "string"
+      }
+    },
+    "type": "object"
+  }
+}

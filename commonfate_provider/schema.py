@@ -1,29 +1,32 @@
+import typing
 from pkg_resources import get_distribution
 from commonfate_provider import namespace, resources, target
+from common_fate_schema.provider import v1alpha1
 
 
-def export_schema() -> dict:
+def export_schema() -> v1alpha1.Schema:
     """
     Export a Provider schema, ready to be serialized in JSON format.
     """
 
-    schema = {}
-
     Provider = namespace.get_provider()
 
-    commonfateProviderCoreVerison = None
+    framework_version = None
     try:
-        commonfateProviderCoreVerison = get_distribution("commonfate_provider").version
-    except Exception as e:
-        print("unable to determine the commonfate_provider package version", e)
-        commonfateProviderCoreVerison = "undefined"
+        framework_version = get_distribution("commonfate_provider").version
+    except Exception:
+        pass
 
-    schema["target"] = target.export_schema()
-    schema["config"] = Provider.export_schema()
-    schema["audit"] = resources.audit_schema()
-    schema["meta"] = {
-        "schemaVersion": 1,
-        "commonfateProviderCoreVersion": commonfateProviderCoreVerison,
-    }
+    config_schema = Provider.export_config_schema()
+    resources_schema = resources.export_schema()
+
+    targets = target.export_schema()
+
+    schema = v1alpha1.Schema(
+        targets=targets,
+        config=config_schema,
+        resources=resources_schema,
+        meta=v1alpha1.Meta(framework=framework_version),
+    )
 
     return schema

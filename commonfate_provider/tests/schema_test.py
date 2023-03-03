@@ -1,3 +1,4 @@
+import json
 import pytest
 from syrupy.extensions.json import JSONSnapshotExtension
 
@@ -34,8 +35,8 @@ def test_schema_with_config(snapshot_json):
         some_val: str
 
     class Provider(provider.Provider):
-        some_config = provider.String(usage="Some config usage")
-        api_token = provider.String(usage="API Token", secret=True)
+        some_config = provider.String(description="Some config usage")
+        api_token = provider.String(description="API Token", secret=True)
 
     @access.target()
     class MyTarget:
