@@ -1,5 +1,5 @@
 import typing
-from commonfate_provider import provider
+from commonfate_provider import provider,namespace
 
 from commonfate_provider.dataclass import ModelMeta
 
@@ -51,7 +51,7 @@ def _execute(provider: provider.Provider, name: str, ctx: dict):
     Top-level resource loaders do not accept any context values.
     """
     # check if we have a top-level resource loader registered under the name
-    resource_loader = _RESOURCE_LOADERS.get(name)
+    resource_loader = namespace._RESOURCE_LOADERS.get(name)
     if resource_loader is not None:
         return resource_loader(provider)
 
