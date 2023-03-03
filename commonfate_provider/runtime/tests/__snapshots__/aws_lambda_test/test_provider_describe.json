@@ -14,6 +14,10 @@
         "resources": {}
       },
       "config": {},
+      "meta": {
+        "commonfateProviderCoreVersion": "0.1.5",
+        "schemaVersion": 1
+      },
       "target": {
         "Default": {
           "schema": {
