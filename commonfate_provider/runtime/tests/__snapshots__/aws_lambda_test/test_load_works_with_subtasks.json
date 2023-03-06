@@ -1,0 +1,13 @@
+{
+  "response": {
+    "resources": [],
+    "tasks": [
+      {
+        "ctx": {
+          "val": "test"
+        },
+        "task": "MyTask"
+      }
+    ]
+  }
+}
