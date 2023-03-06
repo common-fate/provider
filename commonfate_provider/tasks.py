@@ -1,5 +1,5 @@
 import typing
-from commonfate_provider import provider,namespace
+from commonfate_provider import provider, namespace
 
 from commonfate_provider.dataclass import ModelMeta
 
@@ -40,7 +40,7 @@ def call(task: Task):
     _PENDING_TASKS.append(task)
 
 
-def _execute(provider: provider.Provider, name: str, ctx: dict):
+def _execute(provider: provider.Provider, name: str, ctx: typing.Optional[dict]):
     """
     Actually execute a task.
 
@@ -54,6 +54,9 @@ def _execute(provider: provider.Provider, name: str, ctx: dict):
     resource_loader = namespace._RESOURCE_LOADERS.get(name)
     if resource_loader is not None:
         return resource_loader(provider)
+
+    if ctx is None:
+        ctx = {}
 
     for Klass in Task.__subclasses__():
         # todo: handle ambiguity in task class naming
