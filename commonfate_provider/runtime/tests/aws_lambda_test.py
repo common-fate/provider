@@ -2,7 +2,7 @@ import pytest
 from syrupy.extensions.json import JSONSnapshotExtension
 
 from commonfate_provider.runtime import AWSLambdaRuntime
-from commonfate_provider import namespace, provider, access, target, resources
+from commonfate_provider import namespace, provider, access, target, resources, tasks
 from commonfate_provider.tests import helper
 
 
@@ -101,6 +101,34 @@ def test_load_works(snapshot_json):
     def example_loader(p: Provider):
         resources.register(MyResource(id="123", name="name", val="first"))
         resources.register(MyResource(id="456", val="second", name="resource name"))
+
+    p = Provider()
+
+    runtime = AWSLambdaRuntime(
+        provider=p,
+    )
+
+    event = {"type": "load", "data": {"task": "example_loader"}}
+    actual = runtime.handle(event=event, context=None)
+    assert actual == snapshot_json
+
+
+def test_load_works_with_subtasks(snapshot_json):
+    class Provider(provider.Provider):
+        pass
+
+    class MyResource(resources.Resource):
+        val: str
+
+    class MyTask(tasks.Task):
+        val: str
+
+        def run(self, p: Provider):
+            pass
+
+    @resources.loader
+    def example_loader(p: Provider):
+        tasks.call(MyTask(val="test"))
 
     p = Provider()
 

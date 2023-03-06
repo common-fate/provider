@@ -15,7 +15,7 @@ class Task(metaclass=ModelMeta):
         setattr(self, "__dict__", data)
 
     def json(self) -> dict:
-        return {"name": self.__class__.__name__, "ctx": self.__dict__}
+        return {"task": self.__class__.__name__, "ctx": self.__dict__}
 
     def run(self, p) -> None:
         """
