@@ -1,5 +1,5 @@
 {
-  "body": {
+  "response": {
     "config": {
       "api_key": "dict://api_key",
       "api_url": "https://example.com"

@@ -26,7 +26,7 @@ class SecondResource(resources.Resource):
     related_field: typing.Optional[str] = resources.Related(FirstResource)
 
 
-@resources.fetcher
+@resources.loader
 def load_resources():
     pass
 

@@ -1,0 +1,23 @@
+{
+  "response": {
+    "resources": [
+      {
+        "data": {
+          "val": "first"
+        },
+        "id": "123",
+        "name": "name",
+        "type": "MyResource"
+      },
+      {
+        "data": {
+          "val": "second"
+        },
+        "id": "456",
+        "name": "resource name",
+        "type": "MyResource"
+      }
+    ],
+    "tasks": []
+  }
+}

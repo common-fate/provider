@@ -40,7 +40,7 @@ def call(task: Task):
     _PENDING_TASKS.append(task)
 
 
-def _execute(provider: provider.Provider, name: str, ctx: typing.Optional[dict]):
+def _execute(provider: provider.Provider, task: str, ctx: typing.Optional[dict]):
     """
     Actually execute a task.
 
@@ -51,7 +51,7 @@ def _execute(provider: provider.Provider, name: str, ctx: typing.Optional[dict])
     Top-level resource loaders do not accept any context values.
     """
     # check if we have a top-level resource loader registered under the name
-    resource_loader = namespace._RESOURCE_LOADERS.get(name)
+    resource_loader = namespace._RESOURCE_LOADERS.get(task)
     if resource_loader is not None:
         return resource_loader(provider)
 
@@ -60,12 +60,12 @@ def _execute(provider: provider.Provider, name: str, ctx: typing.Optional[dict])
 
     for Klass in Task.__subclasses__():
         # todo: handle ambiguity in task class naming
-        if Klass.__name__ == name:
+        if Klass.__name__ == task:
             task = Klass(**ctx)
             return task.run(provider)
 
     # if we get here, we couldn't find the task.
-    raise Exception(f"could not find task {name}")
+    raise Exception(f"could not find task {task}")
 
 
 def get() -> typing.List[Task]:

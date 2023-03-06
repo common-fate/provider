@@ -24,6 +24,10 @@
             "title": "Id",
             "type": "string"
           },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
           "some_val": {
             "title": "Some Val",
             "type": "string"
@@ -31,6 +35,7 @@
         },
         "required": [
           "id",
+          "name",
           "some_val"
         ],
         "title": "ConfigResource",
