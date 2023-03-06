@@ -55,6 +55,23 @@ class Event(BaseModel):
 _T = typing.TypeVar("_T")
 
 
+class DescribeResponse(BaseModel):
+    provider: dict
+    config: dict
+    diagnostics: typing.List[dict]
+    healthy: bool
+    provider_schema: dict = Field(alias="schema")
+
+
+class LoadResponse(BaseModel):
+    resources: typing.List[dict]
+    tasks: typing.List[dict]
+
+
+class Result(BaseModel):
+    response: typing.Union[DescribeResponse, LoadResponse]
+
+
 @dataclass
 class AWSLambdaRuntime:
     provider: provider.Provider
@@ -63,6 +80,11 @@ class AWSLambdaRuntime:
     publisher: typing.Optional[str] = None
 
     def handle(self, event, context):
+        result = self._do_handle(event=event, context=context)
+        if result is not None:
+            return result.dict(by_alias=True)
+
+    def _do_handle(self, event, context) -> typing.Optional[Result]:
         parsed = Event.parse_obj(event)
         event = parsed.__root__
 
@@ -80,7 +102,7 @@ class AWSLambdaRuntime:
             args = target._initialise(args_cls, event.data.target.arguments)
             grant = registered_target.get_grant_func()
             grant(self.provider, event.data.subject, args)
-            return {"message": "granting access"}
+            return None
 
         elif isinstance(event, Revoke):
             try:
@@ -97,21 +119,29 @@ class AWSLambdaRuntime:
 
             revoke = registered_target.get_revoke_func()
             revoke(self.provider, event.data.subject, args)
-            return {"message": "revoking access"}
+            return None
+
         if isinstance(event, Describe):
             # Describe returns the configuration of the provider including the current status.
-            result = {}
-            result["provider"] = {
+            provider = {
                 "publisher": self.publisher,
                 "name": self.name,
                 "version": self.version,
             }
-            result["config"] = self.provider._safe_config
-            result["diagnostics"] = self.provider.diagnostics.export_logs()
-            result["healthy"] = self.provider.diagnostics.has_no_errors()
-            result["schema"] = schema.export_schema().dict(exclude_none=True)
+            config = self.provider._safe_config
+            diagnostics = self.provider.diagnostics.export_logs()
+            healthy = self.provider.diagnostics.has_no_errors()
+            provider_schema = schema.export_schema().dict(exclude_none=True)
 
-            return {"body": result}
+            response = DescribeResponse(
+                config=config,
+                diagnostics=diagnostics,
+                healthy=healthy,
+                provider=provider,
+                schema=provider_schema,
+            )
+
+            return Result(response=response)
 
         elif isinstance(event, Load):
             resources._reset()
@@ -122,11 +152,13 @@ class AWSLambdaRuntime:
             # find the resources and pending tasks, and return them
             found = resources.get()
             pending_tasks = tasks.get()
-            response = {
-                "resources": [r.export_json() for r in found],
-                "tasks": [t.json() for t in pending_tasks],
-            }
-            return {"body": response}
+
+            response = LoadResponse(
+                resources=[r.export_json() for r in found],
+                tasks=[t.json() for t in pending_tasks],
+            )
+
+            return Result(response=response)
 
         else:
             raise Exception(f"unhandled event type")
