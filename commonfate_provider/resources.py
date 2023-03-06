@@ -25,8 +25,18 @@ class Resource(BaseModel):
         return output
 
 
-class Name:
-    pass
+class UnnamedResource(BaseModel):
+    id: str
+
+    def __init_subclass__(cls) -> None:
+        namespace.register_resource_class(cls)
+        return super().__init_subclass__()
+
+    def export_json(self) -> dict:
+        data = dict(self)
+        id = data.pop("id")
+        output = {"type": self.__class__.__name__, "id": id, "data": data}
+        return output
 
 
 T = typing.TypeVar("T", bound=Resource)
@@ -37,7 +47,7 @@ def Related(
 ) -> str:
     if inspect.isclass(to):
         to = to.__name__
-    return Field(relatedTo=to, title=title, description=description)
+    return Field(relation=to, title=title, description=description)
 
 
 def loader(func: tasks.LoaderFunc):

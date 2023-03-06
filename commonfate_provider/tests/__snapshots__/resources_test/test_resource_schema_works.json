@@ -1,4 +1,66 @@
 {
-  "loaders": {},
-  "types": {}
+  "loaders": {
+    "load_resources": {
+      "title": "load_resources"
+    }
+  },
+  "types": {
+    "FirstResource": {
+      "description": "An example resource",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "related_field": {
+          "relation": "FirstResource",
+          "title": "Related Field",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "value"
+      ],
+      "title": "FirstResource",
+      "type": "object"
+    },
+    "SecondResource": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "related_field": {
+          "relation": "FirstResource",
+          "title": "Related Field",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "value"
+      ],
+      "title": "SecondResource",
+      "type": "object"
+    }
+  }
 }
