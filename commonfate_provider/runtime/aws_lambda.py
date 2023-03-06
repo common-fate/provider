@@ -1,75 +1,13 @@
 from dataclasses import dataclass
+import typing
 from commonfate_provider import (
     provider,
-    target,
     resources,
     tasks,
-    namespace,
     schema,
+    access,
+    rpc,
 )
-import typing
-
-from pydantic import BaseModel, Field
-
-
-class GrantData(BaseModel):
-    class Target(BaseModel):
-        arguments: typing.Dict[str, str]
-        kind: str
-
-    subject: str
-    target: Target
-
-
-class Grant(BaseModel):
-    type: typing.Literal["grant"]
-    data: GrantData
-
-
-class Revoke(BaseModel):
-    type: typing.Literal["revoke"]
-    data: GrantData
-
-
-class Describe(BaseModel):
-    type: typing.Literal["describe"]
-
-
-class Load(BaseModel):
-    class Data(BaseModel):
-        task: str
-        """the resource loader function ID to run"""
-        ctx: typing.Optional[dict] = {}
-        """context information for the task"""
-
-    type: typing.Literal["load"]
-    data: Data
-
-
-class Event(BaseModel):
-    __root__: typing.Union[Grant, Revoke, Load, Describe] = Field(
-        ..., discriminator="type"
-    )
-
-
-_T = typing.TypeVar("_T")
-
-
-class DescribeResponse(BaseModel):
-    provider: dict
-    config: dict
-    diagnostics: typing.List[dict]
-    healthy: bool
-    provider_schema: dict = Field(alias="schema")
-
-
-class LoadResponse(BaseModel):
-    resources: typing.List[dict]
-    tasks: typing.List[dict]
-
-
-class Result(BaseModel):
-    response: typing.Union[DescribeResponse, LoadResponse]
 
 
 @dataclass
@@ -84,44 +22,35 @@ class AWSLambdaRuntime:
         if result is not None:
             return result.dict(by_alias=True)
 
-    def _do_handle(self, event, context) -> typing.Optional[Result]:
-        parsed = Event.parse_obj(event)
+    def _do_handle(self, event, context) -> typing.Optional[rpc.Result]:
+        parsed = rpc.Event.parse_obj(event)
         event = parsed.__root__
 
-        if isinstance(event, Grant):
-            try:
-                registered_targets = namespace.get_target_classes()
-                registered_target = registered_targets[event.data.target.kind]
-                args_cls = registered_target.cls
-            except KeyError:
-                all_keys = ",".join(registered_targets.keys())
-                raise KeyError(
-                    f"unhandled target kind {event.data.target.kind}, supported kinds are [{all_keys}]"
-                )
+        if isinstance(event, rpc.Grant):
+            grant_result = access.call_access_func(
+                type="grant",
+                p=self.provider,
+                data=event.data,
+            )
 
-            args = target._initialise(args_cls, event.data.target.arguments)
-            grant = registered_target.get_grant_func()
-            grant(self.provider, event.data.subject, args)
-            return None
+            if grant_result is None:
+                return rpc.Result(response=rpc.GrantResponse())  # empty response
 
-        elif isinstance(event, Revoke):
-            try:
-                registered_targets = namespace.get_target_classes()
-                registered_target = registered_targets[event.data.target.kind]
-                args_cls = registered_target.cls
-            except KeyError:
-                all_keys = ",".join(registered_targets.keys())
-                raise KeyError(
-                    f"unhandled target kind {event.data.target.kind}, supported kinds are [{all_keys}]"
-                )
+            response = rpc.GrantResponse(
+                access_instructions=grant_result.access_instructions,
+                state=grant_result.state,
+            )
 
-            args = target._initialise(args_cls, event.data.target.arguments)
+            return rpc.Result(response=response)
 
-            revoke = registered_target.get_revoke_func()
-            revoke(self.provider, event.data.subject, args)
-            return None
+        elif isinstance(event, rpc.Revoke):
+            return access.call_access_func(
+                type="revoke",
+                p=self.provider,
+                data=event.data,
+            )
 
-        if isinstance(event, Describe):
+        if isinstance(event, rpc.Describe):
             # Describe returns the configuration of the provider including the current status.
             provider = {
                 "publisher": self.publisher,
@@ -131,9 +60,11 @@ class AWSLambdaRuntime:
             config = self.provider._safe_config
             diagnostics = self.provider.diagnostics.export_logs()
             healthy = self.provider.diagnostics.has_no_errors()
-            provider_schema = schema.export_schema().dict(exclude_none=True)
+            provider_schema = schema.export_schema().dict(
+                exclude_none=True, by_alias=True
+            )
 
-            response = DescribeResponse(
+            response = rpc.DescribeResponse(
                 config=config,
                 diagnostics=diagnostics,
                 healthy=healthy,
@@ -141,9 +72,9 @@ class AWSLambdaRuntime:
                 schema=provider_schema,
             )
 
-            return Result(response=response)
+            return rpc.Result(response=response)
 
-        elif isinstance(event, Load):
+        elif isinstance(event, rpc.Load):
             resources._reset()
             tasks._reset()
             tasks._execute(
@@ -153,12 +84,12 @@ class AWSLambdaRuntime:
             found = resources.get()
             pending_tasks = tasks.get()
 
-            response = LoadResponse(
+            response = rpc.LoadResponse(
                 resources=[r.export_json() for r in found],
                 tasks=[t.json() for t in pending_tasks],
             )
 
-            return Result(response=response)
+            return rpc.Result(response=response)
 
         else:
             raise Exception(f"unhandled event type")
