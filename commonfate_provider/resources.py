@@ -9,13 +9,24 @@ def composite_id(fields: typing.List[str]):
     return "/".join(fields)
 
 
-class Resource(BaseModel):
+class BaseResource(BaseModel):
+    #  A resource with no name. Usually you'll want to subclass resources.Resource instead.
+
     id: str
-    name: str
 
     def __init_subclass__(cls) -> None:
         namespace.register_resource_class(cls)
         return super().__init_subclass__()
+
+    def export_json(self) -> dict:
+        data = dict(self)
+        id = data.pop("id")
+        output = {"type": self.__class__.__name__, "id": id, "data": data}
+        return output
+
+
+class Resource(BaseResource):
+    name: str
 
     def export_json(self) -> dict:
         data = dict(self)
@@ -25,11 +36,7 @@ class Resource(BaseModel):
         return output
 
 
-class Name:
-    pass
-
-
-T = typing.TypeVar("T", bound=Resource)
+T = typing.TypeVar("T", bound=BaseResource)
 
 
 def Related(
@@ -37,7 +44,7 @@ def Related(
 ) -> str:
     if inspect.isclass(to):
         to = to.__name__
-    return Field(relatedTo=to, title=title, description=description)
+    return Field(relation=to, title=title, description=description)
 
 
 def loader(func: tasks.LoaderFunc):
@@ -66,11 +73,11 @@ def export_schema() -> v1alpha1.Resources:
     return resources
 
 
-def register(resource: Resource):
+def register(resource: BaseResource):
     namespace._ALL_RESOURCES.append(resource)
 
 
-def get() -> typing.List[Resource]:
+def get() -> typing.List[BaseResource]:
     return namespace._ALL_RESOURCES
 
 
