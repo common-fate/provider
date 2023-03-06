@@ -2,7 +2,7 @@ import pytest
 from syrupy.extensions.json import JSONSnapshotExtension
 
 from commonfate_provider.runtime import AWSLambdaRuntime
-from commonfate_provider import config, namespace, provider, access, target
+from commonfate_provider import namespace, provider, access, target, resources
 from commonfate_provider.tests import helper
 
 
@@ -86,5 +86,28 @@ def test_provider_describe_with_errors(snapshot_json):
     p.diagnostics.error("some error happened!")
 
     event = {"type": "describe"}
+    actual = runtime.handle(event=event, context=None)
+    assert actual == snapshot_json
+
+
+def test_load_works(snapshot_json):
+    class Provider(provider.Provider):
+        pass
+
+    class MyResource(resources.Resource):
+        val: str
+
+    @resources.loader
+    def example_loader(p: Provider):
+        resources.register(MyResource(id="123", name="name", val="first"))
+        resources.register(MyResource(id="456", val="second", name="resource name"))
+
+    p = Provider()
+
+    runtime = AWSLambdaRuntime(
+        provider=p,
+    )
+
+    event = {"type": "load", "data": {"task": "example_loader"}}
     actual = runtime.handle(event=event, context=None)
     assert actual == snapshot_json

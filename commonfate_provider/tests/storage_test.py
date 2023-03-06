@@ -13,7 +13,7 @@ class ExampleResource(resources.Resource):
 
 
 def test_resource_equality():
-    first = ExampleResource(id="test", value="test")
-    second = ExampleResource(id="test", value="test")
+    first = ExampleResource(id="test", name="test", value="test")
+    second = ExampleResource(id="test", name="test", value="test")
     assert first.__eq__ is not None
     assert first == second

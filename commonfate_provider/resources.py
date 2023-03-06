@@ -11,13 +11,22 @@ def composite_id(fields: typing.List[str]):
 
 class Resource(BaseModel):
     id: str
+    name: str
 
     def __init_subclass__(cls) -> None:
         namespace.register_resource_class(cls)
         return super().__init_subclass__()
 
     def export_json(self) -> dict:
-        return {"type": self.__class__.__name__, "data": dict(self)}
+        data = dict(self)
+        id = data.pop("id")
+        name = data.pop("name")
+        output = {"type": self.__class__.__name__, "id": id, "name": name, "data": data}
+        return output
+
+
+class Name:
+    pass
 
 
 T = typing.TypeVar("T", bound=Resource)
@@ -31,7 +40,7 @@ def Related(
     return Field(relatedTo=to, title=title, description=description)
 
 
-def fetcher(func: tasks.LoaderFunc):
+def loader(func: tasks.LoaderFunc):
     namespace.register_resource_loader(func)
     return func
 

@@ -35,19 +35,19 @@ class Describe(BaseModel):
     type: typing.Literal["describe"]
 
 
-class LoadResources(BaseModel):
+class Load(BaseModel):
     class Data(BaseModel):
-        name: str
+        task: str
         """the resource loader function ID to run"""
         ctx: typing.Optional[dict] = {}
         """context information for the task"""
 
-    type: typing.Literal["loadResources"]
+    type: typing.Literal["load"]
     data: Data
 
 
 class Event(BaseModel):
-    __root__: typing.Union[Grant, Revoke, LoadResources, Describe] = Field(
+    __root__: typing.Union[Grant, Revoke, Load, Describe] = Field(
         ..., discriminator="type"
     )
 
@@ -113,11 +113,11 @@ class AWSLambdaRuntime:
 
             return {"body": result}
 
-        elif isinstance(event, LoadResources):
+        elif isinstance(event, Load):
             resources._reset()
             tasks._reset()
             tasks._execute(
-                provider=self.provider, name=event.data.name, ctx=event.data.ctx
+                provider=self.provider, task=event.data.task, ctx=event.data.ctx
             )
             # find the resources and pending tasks, and return them
             found = resources.get()
@@ -126,7 +126,6 @@ class AWSLambdaRuntime:
                 "resources": [r.export_json() for r in found],
                 "tasks": [t.json() for t in pending_tasks],
             }
-            print(response)
             return {"body": response}
 
         else:
