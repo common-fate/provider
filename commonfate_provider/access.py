@@ -5,7 +5,7 @@ import typing
 
 from pydantic import BaseModel
 
-from commonfate_provider import namespace, provider
+from commonfate_provider import namespace, provider, rpc
 from commonfate_provider import target as cf_target
 
 
@@ -151,17 +151,15 @@ def revoke(
     return actual_decorator
 
 
-def call_revoke(
+def call_access_func(
+    type: typing.Union[typing.Literal["grant"], typing.Literal["revoke"]],
     p: provider.Provider,
-    subject: str,
-    target_kind: str,
-    arguments: typing.Dict[str, str],
-    state: typing.Optional[dict] = None,
+    data: rpc.GrantData,
 ):
     """
-    Calls the actual @access.revoke() function.
+    Calls the actual @access.grant() or @access.revoke function.
 
-    The PDK supports optional 'state' which is passed between grant() and revoke().
+    The PDK supports optional 'state', and "request" which is passed between grant() and revoke().
 
     For a stateful revoke function, the signature looks like:
     ```
@@ -180,25 +178,34 @@ def call_revoke(
     """
     try:
         registered_targets = namespace.get_target_classes()
-        registered_target = registered_targets[target_kind]
+        registered_target = registered_targets[data.target.kind]
         args_cls = registered_target.cls
     except KeyError:
         all_keys = ",".join(registered_targets.keys())
         raise KeyError(
-            f"unhandled target kind {target_kind}, supported kinds are [{all_keys}]"
+            f"unhandled target kind {data.target.kind}, supported kinds are [{all_keys}]"
         )
 
-    t = cf_target._initialise(args_cls, arguments)
+    t = cf_target._initialise(args_cls, data.target.arguments)
 
-    revoke = registered_target.get_revoke_func()
+    if type == "grant":
+        func = registered_target.get_grant_func()
+    else:
+        func = registered_target.get_revoke_func()
 
     # initialise the arguments that the revoke() function
     # will be called by
-    kwargs = {"p": p, "subject": subject, "target": t, "state": state}
+    kwargs = {
+        "p": p,
+        "subject": data.subject,
+        "target": t,
+        "state": data.state,
+        "request": data.request,
+    }
 
-    spec = inspect.getfullargspec(revoke)
+    spec = inspect.getfullargspec(func)
 
-    # check if the revoke function uses state
+    # check if the function uses state
     state_anno = spec.annotations.get("state", None)
 
     # if it doesn't, remove it from the arguments
@@ -207,6 +214,14 @@ def call_revoke(
         del kwargs["state"]
 
     elif issubclass(state_anno, BaseModel):
-        kwargs["state"] = state_anno.parse_obj(state)
+        kwargs["state"] = state_anno.parse_obj(data.state)
 
-    revoke(**kwargs)
+    # check if the function uses the request
+    request_anno = spec.annotations.get("request", None)
+
+    # if it doesn't, remove it from the arguments
+    # the function is called with
+    if request_anno is None:
+        del kwargs["request"]
+
+    return func(**kwargs)

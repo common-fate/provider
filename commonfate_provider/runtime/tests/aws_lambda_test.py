@@ -30,7 +30,7 @@ def runtime_fixture():
         pass
 
     @access.grant(kind="Default")
-    def grant(p: BasicProvider, subject, args):
+    def grant(p: BasicProvider, subject: str, target: Args):
         pass
 
     basic_provider = BasicProvider()

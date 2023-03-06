@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from pydantic import BaseModel
 import pytest
-from commonfate_provider import access, namespace, provider
+from commonfate_provider import access, namespace, provider, rpc
 
 
 @pytest.fixture(autouse=True)
@@ -49,12 +49,17 @@ def test_call_revoke_works():
         nonlocal got_var
         got_var = state.my_val
 
-    access.call_revoke(
+    access.call_access_func(
+        type="revoke",
         p=Provider(),
-        subject="test",
-        target_kind="ExampleTarget",
-        arguments={},
-        state={"my_val": "test"},
+        data=rpc.GrantData(
+            subject="test",
+            target=rpc.GrantData.Target(
+                kind="ExampleTarget",
+                arguments={},
+            ),
+            state={"my_val": "test"},
+        ),
     )
 
     # this should be set if the revoke function
@@ -74,12 +79,17 @@ def test_call_revoke_works_with_no_context():
     def revoke(p: Provider, subject: str, target: ExampleTarget):
         pass
 
-    access.call_revoke(
+    access.call_access_func(
+        type="revoke",
         p=Provider(),
-        subject="test",
-        target_kind="ExampleTarget",
-        arguments={},
-        state=None,
+        data=rpc.GrantData(
+            subject="test",
+            target=rpc.GrantData.Target(
+                kind="ExampleTarget",
+                arguments={},
+            ),
+            state=None,
+        ),
     )
 
 
@@ -98,12 +108,50 @@ def test_call_revoke_works_with_dict():
         nonlocal got_var
         got_var = state["test"]
 
-    access.call_revoke(
+    access.call_access_func(
+        type="revoke",
         p=Provider(),
-        subject="test",
-        target_kind="ExampleTarget",
-        arguments={},
-        state={"test": "example"},
+        data=rpc.GrantData(
+            subject="test",
+            target=rpc.GrantData.Target(
+                kind="ExampleTarget",
+                arguments={},
+            ),
+            state={"test": "example"},
+        ),
     )
 
     assert got_var == "example"
+
+
+def test_call_revoke_passes_request_id():
+    class Provider(provider.Provider):
+        pass
+
+    @access.target()
+    class ExampleTarget:
+        pass
+
+    got_var = None
+
+    @access.revoke()
+    def revoke(
+        p: Provider, subject: str, target: ExampleTarget, request: rpc.AccessRequest
+    ):
+        nonlocal got_var
+        got_var = request.id
+
+    access.call_access_func(
+        type="revoke",
+        p=Provider(),
+        data=rpc.GrantData(
+            subject="test",
+            target=rpc.GrantData.Target(
+                kind="ExampleTarget",
+                arguments={},
+            ),
+            request=rpc.AccessRequest(id="req_123"),
+        ),
+    )
+
+    assert got_var == "req_123"
