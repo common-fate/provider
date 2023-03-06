@@ -41,7 +41,7 @@ def test_resource_schema_works(snapshot_json):
 
 
 def test_resource_schema_works_with_unnamed_resources(snapshot_json):
-    class NoName(resources.UnnamedResource):
+    class NoName(resources.BaseResource):
         """
         An example resource
         """
