@@ -39,7 +39,7 @@ class LoadResources(BaseModel):
     class Data(BaseModel):
         name: str
         """the resource loader function ID to run"""
-        ctx: dict = {}
+        ctx: typing.Optional[dict] = {}
         """context information for the task"""
 
     type: typing.Literal["loadResources"]
