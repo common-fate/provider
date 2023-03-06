@@ -1,8 +1,12 @@
 from dataclasses import dataclass
+import inspect
 import typing_extensions
 import typing
 
-from commonfate_provider import namespace
+from pydantic import BaseModel
+
+from commonfate_provider import namespace, provider
+from commonfate_provider import target as cf_target
 
 
 _T = typing.TypeVar("_T")
@@ -35,12 +39,15 @@ def target(
     return actual_decorator
 
 
-@dataclass
-class GrantResult:
+class GrantResult(BaseModel):
     access_instructions: typing.Optional[str] = None
     """
     Instructions on how to access the entitlements.
     Common Fate will display these to the user upon a successful Access Request.
+    """
+    state: typing.Optional[BaseModel] = None
+    """
+    State which will be stored and provided to the corresponding revoke function.
     """
 
 
@@ -142,3 +149,64 @@ def revoke(
         return func
 
     return actual_decorator
+
+
+def call_revoke(
+    p: provider.Provider,
+    subject: str,
+    target_kind: str,
+    arguments: typing.Dict[str, str],
+    state: typing.Optional[dict] = None,
+):
+    """
+    Calls the actual @access.revoke() function.
+
+    The PDK supports optional 'state' which is passed between grant() and revoke().
+
+    For a stateful revoke function, the signature looks like:
+    ```
+    def revoke(p: Provider, subject: str, target: Target, state: State):
+        ...
+    ```
+
+    For a stateless revoke function, the signature looks like:
+    ```
+    def revoke(p: Provider, subject: str, target: Target):
+        ...
+    ```
+
+    This method inspects the signature of the revoke function, and passes
+    state through if the signature supports it.
+    """
+    try:
+        registered_targets = namespace.get_target_classes()
+        registered_target = registered_targets[target_kind]
+        args_cls = registered_target.cls
+    except KeyError:
+        all_keys = ",".join(registered_targets.keys())
+        raise KeyError(
+            f"unhandled target kind {target_kind}, supported kinds are [{all_keys}]"
+        )
+
+    t = cf_target._initialise(args_cls, arguments)
+
+    revoke = registered_target.get_revoke_func()
+
+    # initialise the arguments that the revoke() function
+    # will be called by
+    kwargs = {"p": p, "subject": subject, "target": t, "state": state}
+
+    spec = inspect.getfullargspec(revoke)
+
+    # check if the revoke function uses state
+    state_anno = spec.annotations.get("state", None)
+
+    # if it doesn't, remove it from the arguments
+    # the function is called with
+    if state_anno is None:
+        del kwargs["state"]
+
+    elif issubclass(state_anno, BaseModel):
+        kwargs["state"] = state_anno.parse_obj(state)
+
+    revoke(**kwargs)

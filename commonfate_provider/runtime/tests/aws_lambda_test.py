@@ -1,3 +1,4 @@
+from pydantic import BaseModel
 import pytest
 from syrupy.extensions.json import JSONSnapshotExtension
 
@@ -139,3 +140,75 @@ def test_load_works_with_subtasks(snapshot_json):
     event = {"type": "load", "data": {"task": "example_loader"}}
     actual = runtime.handle(event=event, context=None)
     assert actual == snapshot_json
+
+
+def test_grant_works(snapshot_json):
+    class Provider(provider.Provider):
+        pass
+
+    @access.target()
+    class Target:
+        pass
+
+    class State(BaseModel):
+        something: str
+
+    @access.grant()
+    def grant(p: Provider, subject: str, target: Target) -> access.GrantResult:
+        return access.GrantResult(
+            access_instructions="test", state=State(something="something")
+        )
+
+    p = Provider()
+
+    runtime = AWSLambdaRuntime(
+        provider=p,
+    )
+
+    event = {
+        "type": "grant",
+        "data": {"subject": "testuser", "target": {"kind": "Target", "arguments": {}}},
+    }
+    actual = runtime.handle(event=event, context=None)
+    assert actual == snapshot_json
+
+
+def test_revoke_works_with_state():
+    class Provider(provider.Provider):
+        pass
+
+    @access.target()
+    class Target:
+        pass
+
+    class State(BaseModel):
+        something: str
+
+    got_var = None
+
+    @access.revoke()
+    def revoke(
+        p: Provider, subject: str, target: Target, state: State
+    ) -> access.GrantResult:
+        nonlocal got_var
+        got_var = state.something
+
+    p = Provider()
+
+    runtime = AWSLambdaRuntime(
+        provider=p,
+    )
+
+    event = {
+        "type": "revoke",
+        "data": {
+            "state": {"something": "test"},
+            "subject": "testuser",
+            "target": {"kind": "Target", "arguments": {}},
+        },
+    }
+    actual = runtime.handle(event=event, context=None)
+
+    # this should be set if the revoke function was
+    # called with the correct state.
+    assert got_var == "test"

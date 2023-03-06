@@ -1,0 +1,8 @@
+{
+  "response": {
+    "access_instructions": "test",
+    "state": {
+      "something": "something"
+    }
+  }
+}

@@ -6,6 +6,7 @@ from commonfate_provider import (
     tasks,
     namespace,
     schema,
+    access,
 )
 import typing
 
@@ -19,6 +20,7 @@ class GrantData(BaseModel):
 
     subject: str
     target: Target
+    state: typing.Optional[dict] = None
 
 
 class Grant(BaseModel):
@@ -68,8 +70,13 @@ class LoadResponse(BaseModel):
     tasks: typing.List[dict]
 
 
+class GrantResponse(BaseModel):
+    access_instructions: typing.Optional[str] = None
+    state: typing.Optional[dict] = None
+
+
 class Result(BaseModel):
-    response: typing.Union[DescribeResponse, LoadResponse]
+    response: typing.Union[DescribeResponse, LoadResponse, GrantResponse]
 
 
 @dataclass
@@ -99,27 +106,28 @@ class AWSLambdaRuntime:
                     f"unhandled target kind {event.data.target.kind}, supported kinds are [{all_keys}]"
                 )
 
-            args = target._initialise(args_cls, event.data.target.arguments)
-            grant = registered_target.get_grant_func()
-            grant(self.provider, event.data.subject, args)
-            return None
+            t = target._initialise(args_cls, event.data.target.arguments)
+            grant: access.GrantFunc = registered_target.get_grant_func()
+            grant_result = grant(self.provider, event.data.subject, t)
+
+            if grant_result is None:
+                return Result(response=GrantResponse())  # empty response
+
+            response = GrantResponse(
+                access_instructions=grant_result.access_instructions,
+                state=grant_result.state,
+            )
+
+            return Result(response=response)
 
         elif isinstance(event, Revoke):
-            try:
-                registered_targets = namespace.get_target_classes()
-                registered_target = registered_targets[event.data.target.kind]
-                args_cls = registered_target.cls
-            except KeyError:
-                all_keys = ",".join(registered_targets.keys())
-                raise KeyError(
-                    f"unhandled target kind {event.data.target.kind}, supported kinds are [{all_keys}]"
-                )
-
-            args = target._initialise(args_cls, event.data.target.arguments)
-
-            revoke = registered_target.get_revoke_func()
-            revoke(self.provider, event.data.subject, args)
-            return None
+            return access.call_revoke(
+                p=self.provider,
+                subject=event.data.subject,
+                target_kind=event.data.target.kind,
+                arguments=event.data.target.arguments,
+                state=event.data.state,
+            )
 
         if isinstance(event, Describe):
             # Describe returns the configuration of the provider including the current status.
@@ -131,7 +139,9 @@ class AWSLambdaRuntime:
             config = self.provider._safe_config
             diagnostics = self.provider.diagnostics.export_logs()
             healthy = self.provider.diagnostics.has_no_errors()
-            provider_schema = schema.export_schema().dict(exclude_none=True)
+            provider_schema = schema.export_schema().dict(
+                exclude_none=True, by_alias=True
+            )
 
             response = DescribeResponse(
                 config=config,
