@@ -91,6 +91,24 @@ def test_provider_describe_with_errors(snapshot_json):
     assert actual == snapshot_json
 
 
+def test_provider_describe_with_resources(snapshot_json):
+    class Provider(provider.Provider):
+        pass
+
+    class MyResource(resources.Resource):
+        val: str
+
+    class OtherResource(resources.BaseResource):
+        other_val: str
+
+    p = Provider()
+    runtime = AWSLambdaRuntime(provider=p)
+
+    event = {"type": "describe"}
+    actual = runtime.handle(event=event, context=None)
+    assert actual == snapshot_json
+
+
 def test_load_works(snapshot_json):
     class Provider(provider.Provider):
         pass
