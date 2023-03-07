@@ -4,7 +4,7 @@ from commonfate_provider import namespace, resources, target
 from common_fate_schema.provider import v1alpha1
 
 
-def export_schema() -> v1alpha1.Schema:
+def export_schema(id: typing.Optional[v1alpha1.ID] = None) -> v1alpha1.Schema:
     """
     Export a Provider schema, ready to be serialized in JSON format.
     """
@@ -23,6 +23,7 @@ def export_schema() -> v1alpha1.Schema:
     targets = target.export_schema()
 
     schema = v1alpha1.Schema(
+        id=id,
         targets=targets,
         config=config_schema,
         resources=resources_schema,

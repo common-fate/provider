@@ -65,7 +65,11 @@ def test_provider_describe_with_config(snapshot_json):
         {"api_url": "https://example.com", "api_key": "abcdef"}
     )
     runtime = AWSLambdaRuntime(
-        provider=p, publisher="acmecorp", name="test", version="v0.1.0"
+        provider=p,
+        publisher="acmecorp",
+        name="test",
+        version="v0.1.0",
+        schema_version="v1",
     )
 
     event = {"type": "describe"}
@@ -82,7 +86,11 @@ def test_provider_describe_with_errors(snapshot_json):
         {"api_url": "https://example.com", "api_key": "abcdef"}
     )
     runtime = AWSLambdaRuntime(
-        provider=p, publisher="acmecorp", name="test", version="v0.1.0"
+        provider=p,
+        publisher="acmecorp",
+        name="test",
+        version="v0.1.0",
+        schema_version="v1",
     )
     p.diagnostics.error("some error happened!")
 
