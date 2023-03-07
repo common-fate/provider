@@ -59,6 +59,7 @@ runtime = AWSLambdaRuntime(
     name=load_metadata_value(provider_data, "name"),
     version=load_metadata_value(provider_data, "version"),
     publisher=load_metadata_value(provider_data, "publisher"),
+    schema_version=load_metadata_value(provider_data, "schema_version"),
 )
 
 
