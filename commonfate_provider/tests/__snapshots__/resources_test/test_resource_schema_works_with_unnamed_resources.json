@@ -4,12 +4,14 @@
     "NoName": {
       "description": "An example resource",
       "properties": {
-        "id": {
-          "title": "Id",
-          "type": "string"
+        "data": {
+          "value": {
+            "title": "Value",
+            "type": "string"
+          }
         },
-        "value": {
-          "title": "Value",
+        "id": {
+          "title": "ID",
           "type": "string"
         }
       },

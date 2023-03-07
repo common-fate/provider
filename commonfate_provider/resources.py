@@ -12,7 +12,7 @@ def composite_id(fields: typing.List[str]):
 class BaseResource(BaseModel):
     #  A resource with no name. Usually you'll want to subclass resources.Resource instead.
 
-    id: str
+    id: str = Field(title="ID")
 
     def __init_subclass__(cls) -> None:
         namespace.register_resource_class(cls)
@@ -23,6 +23,31 @@ class BaseResource(BaseModel):
         id = data.pop("id")
         output = {"type": self.__class__.__name__, "id": id, "data": data}
         return output
+
+    class Config:
+        @staticmethod
+        def schema_extra(
+            schema: typing.Dict[str, typing.Any], model: typing.Type["BaseResource"]
+        ) -> None:
+            """
+            shift all of the properties that aren't 'id' or 'name' into a 'data'
+            field in the schema to match the export_json() method
+            """
+
+            data_keys = [
+                key
+                for key in schema.get("properties", {}).keys()
+                if key != "id" and key != "name"
+            ]
+
+            if len(data_keys) == 0:
+                return
+
+            schema["properties"]["data"] = {}
+
+            for key in data_keys:
+                subschema = schema["properties"].pop(key)
+                schema["properties"]["data"][key] = subschema
 
 
 class Resource(BaseResource):

@@ -19,16 +19,18 @@
         "types": {
           "MyResource": {
             "properties": {
+              "data": {
+                "val": {
+                  "title": "Val",
+                  "type": "string"
+                }
+              },
               "id": {
-                "title": "Id",
+                "title": "ID",
                 "type": "string"
               },
               "name": {
                 "title": "Name",
-                "type": "string"
-              },
-              "val": {
-                "title": "Val",
                 "type": "string"
               }
             },
@@ -42,12 +44,14 @@
           },
           "OtherResource": {
             "properties": {
-              "id": {
-                "title": "Id",
-                "type": "string"
+              "data": {
+                "other_val": {
+                  "title": "Other Val",
+                  "type": "string"
+                }
               },
-              "other_val": {
-                "title": "Other Val",
+              "id": {
+                "title": "ID",
                 "type": "string"
               }
             },

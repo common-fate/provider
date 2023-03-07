@@ -8,21 +8,23 @@
     "FirstResource": {
       "description": "An example resource",
       "properties": {
+        "data": {
+          "related_field": {
+            "relation": "FirstResource",
+            "title": "Related Field",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          }
+        },
         "id": {
-          "title": "Id",
+          "title": "ID",
           "type": "string"
         },
         "name": {
           "title": "Name",
-          "type": "string"
-        },
-        "related_field": {
-          "relation": "FirstResource",
-          "title": "Related Field",
-          "type": "string"
-        },
-        "value": {
-          "title": "Value",
           "type": "string"
         }
       },
@@ -36,21 +38,23 @@
     },
     "SecondResource": {
       "properties": {
+        "data": {
+          "related_field": {
+            "relation": "FirstResource",
+            "title": "Related Field",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          }
+        },
         "id": {
-          "title": "Id",
+          "title": "ID",
           "type": "string"
         },
         "name": {
           "title": "Name",
-          "type": "string"
-        },
-        "related_field": {
-          "relation": "FirstResource",
-          "title": "Related Field",
-          "type": "string"
-        },
-        "value": {
-          "title": "Value",
           "type": "string"
         }
       },

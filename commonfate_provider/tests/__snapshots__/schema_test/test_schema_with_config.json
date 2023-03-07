@@ -20,16 +20,18 @@
     "types": {
       "ConfigResource": {
         "properties": {
+          "data": {
+            "some_val": {
+              "title": "Some Val",
+              "type": "string"
+            }
+          },
           "id": {
-            "title": "Id",
+            "title": "ID",
             "type": "string"
           },
           "name": {
             "title": "Name",
-            "type": "string"
-          },
-          "some_val": {
-            "title": "Some Val",
             "type": "string"
           }
         },
