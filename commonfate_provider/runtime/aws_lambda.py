@@ -8,6 +8,7 @@ from commonfate_provider import (
     access,
     rpc,
 )
+from common_fate_schema.provider import v1alpha1
 
 
 @dataclass
@@ -16,6 +17,7 @@ class AWSLambdaRuntime:
     name: typing.Optional[str] = None
     version: typing.Optional[str] = None
     publisher: typing.Optional[str] = None
+    schema_version: typing.Optional[str] = None
 
     def handle(self, event, context):
         result = self._do_handle(event=event, context=context)
@@ -60,7 +62,16 @@ class AWSLambdaRuntime:
             config = self.provider._safe_config
             diagnostics = self.provider.diagnostics.export_logs()
             healthy = self.provider.diagnostics.has_no_errors()
-            provider_schema = schema.export_schema().dict(
+
+            id = None
+            if self.name is not None:
+                id = v1alpha1.ID(
+                    name=self.name,
+                    publisher=self.publisher,
+                    schema_version=self.schema_version,
+                )
+
+            provider_schema = schema.export_schema(id=id).dict(
                 exclude_none=True, by_alias=True
             )
 
