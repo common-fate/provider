@@ -1,5 +1,6 @@
 {
   "name": "test",
-  "version": "v1",
-  "publisher": "test-publisher"
+  "version": "v1.0.0",
+  "publisher": "test-publisher",
+  "schema_version": "v1"
 }
