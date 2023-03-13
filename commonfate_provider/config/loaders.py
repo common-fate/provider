@@ -127,20 +127,24 @@ class SSMSecretLoader(SecretStringLoader):
         """
         env_var = f"PROVIDER_SECRET_{field_name.upper()}"
 
-        secret_path = os.getenv(env_var)
-        if secret_path is None:
+        secret_ref = os.getenv(env_var)
+        if secret_ref is None:
             raise NotFoundError(f"{env_var} environment variable is not set")
+
+        # secret ref is in the format 'awsssm:///path/to/secret'
+        # trim the awsssm:// part out
+        secret_path = secret_ref.removeprefix("awsssm://")
 
         client = boto3.client("ssm")
         try:
             res = client.get_parameter(Name=secret_path, WithDecryption=True)
 
-            return Secret(ref=f"{secret_path}", value=res["Parameter"]["Value"])
+            return Secret(ref=f"{secret_ref}", value=res["Parameter"]["Value"])
 
         except ClientError as e:
             if e.response["Error"]["Code"] == "ParameterNotFound":
                 raise NotFoundError(
-                    f"The AWS SSM parameter '{secret_path}' was not found"
+                    f"The AWS SSM parameter '{secret_ref}' was not found"
                 )
             else:
                 raise e
