@@ -12,7 +12,7 @@
       "$schema": "https://schema.commonfate.io/provider/v1alpha1",
       "config": {},
       "meta": {
-        "framework": "0.2.0"
+        "framework": "0.10.0"
       },
       "resources": {
         "loaders": {},

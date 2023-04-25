@@ -32,7 +32,7 @@
         }
       },
       "meta": {
-        "framework": "0.2.0"
+        "framework": "0.10.0"
       },
       "resources": {
         "loaders": {},

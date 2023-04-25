@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "provider"
-version = "0.2.0"
+version = "0.10.0"
 description = "Common Fate Provider Development Kit"
 authors = ["Common Fate <hello@commonfate.io>"]
 readme = "README.md"
