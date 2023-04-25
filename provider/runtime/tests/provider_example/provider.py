@@ -1,4 +1,5 @@
-from provider import provider, access, target
+import provider
+from provider import access, target
 
 
 class MyProvider(provider.Provider):

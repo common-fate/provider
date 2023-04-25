@@ -1,5 +1,6 @@
 import typing
-from provider import config, namespace, provider
+from provider import config, namespace
+import provider
 
 
 def initialise_provider(

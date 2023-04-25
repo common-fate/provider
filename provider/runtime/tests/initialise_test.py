@@ -1,4 +1,4 @@
-from provider import provider
+import provider
 from provider.runtime import initialise
 
 

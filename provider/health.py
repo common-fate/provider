@@ -1,4 +1,5 @@
-from provider import namespace, provider
+from provider import namespace
+import provider
 
 
 def validate_config(p: provider.Provider):

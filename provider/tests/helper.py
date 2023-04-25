@@ -1,6 +1,7 @@
 import typing
 
-from provider import config, provider
+import provider
+from provider import config
 from provider.config import loaders
 from provider.runtime import initialise
 

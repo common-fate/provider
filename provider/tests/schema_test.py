@@ -2,7 +2,8 @@ import json
 import pytest
 from syrupy.extensions.json import JSONSnapshotExtension
 
-from provider import access, namespace, provider, resources, schema, target
+import provider
+from provider import access, namespace, resources, schema, target
 
 
 @pytest.fixture(autouse=True)

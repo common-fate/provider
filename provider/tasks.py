@@ -1,5 +1,6 @@
 import typing
-from provider import provider, namespace
+from provider import namespace
+import provider
 
 from provider.dataclass import ModelMeta
 

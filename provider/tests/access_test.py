@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 from pydantic import BaseModel
 import pytest
-from provider import access, namespace, provider, rpc
+
+from provider import access, namespace, rpc
+import provider
 
 
 @pytest.fixture(autouse=True)

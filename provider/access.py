@@ -5,9 +5,9 @@ import typing
 
 from pydantic import BaseModel
 
-from provider import namespace, provider, rpc
+import provider
+from provider import namespace, rpc
 from provider import target as cf_target
-
 
 _T = typing.TypeVar("_T")
 

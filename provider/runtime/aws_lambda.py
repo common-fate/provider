@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import typing
+import provider
 from provider import (
-    provider,
     resources,
     tasks,
     schema,
