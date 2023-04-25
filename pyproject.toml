@@ -1,16 +1,16 @@
 [tool.poetry]
-name = "commonfate_provider"
-version = "0.1.5"
-description = "Python Provider Development kit"
-authors = ["Chris Norman <chris@commonfate.io>", "Manish Chaulagain <manish@commonfate.io>", "Josh Wilkes <josh@commonfate.io>", "Jack Meyer <jack@commonfate.io>", "Jordi Hermoso <jordi@commonfate.io>"]
+name = "provider"
+version = "0.10.0"
+description = "Common Fate Provider Development Kit"
+authors = ["Common Fate <hello@commonfate.io>"]
 readme = "README.md"
-packages = [{include = "commonfate_provider"}]
-include = ["commonfate_provider/**/*.py"]
+packages = [{include = "provider"}]
+include = ["provider/**/*.py"]
 ## TODO: Not excluding test from the build
-exclude = ["commonfate_provider/tests/**"]
+exclude = ["provider/tests/**"]
 
 [tool.poetry.scripts]
-commonfate-provider-py = "commonfate_provider.cli.main:cli"
+provider = "provider.cli.main:cli"
 
 [tool.poetry.dependencies]
 python = "^3.9"

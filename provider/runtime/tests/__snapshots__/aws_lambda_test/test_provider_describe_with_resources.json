@@ -1,0 +1,70 @@
+{
+  "response": {
+    "config": {},
+    "diagnostics": [],
+    "healthy": true,
+    "provider": {
+      "name": null,
+      "publisher": null,
+      "version": null
+    },
+    "schema": {
+      "$schema": "https://schema.commonfate.io/provider/v1alpha1",
+      "config": {},
+      "meta": {
+        "framework": "0.10.0"
+      },
+      "resources": {
+        "loaders": {},
+        "types": {
+          "MyResource": {
+            "properties": {
+              "data": {
+                "val": {
+                  "title": "Val",
+                  "type": "string"
+                }
+              },
+              "id": {
+                "title": "ID",
+                "type": "string"
+              },
+              "name": {
+                "title": "Name",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "val"
+            ],
+            "title": "MyResource",
+            "type": "object"
+          },
+          "OtherResource": {
+            "properties": {
+              "data": {
+                "other_val": {
+                  "title": "Other Val",
+                  "type": "string"
+                }
+              },
+              "id": {
+                "title": "ID",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "other_val"
+            ],
+            "title": "OtherResource",
+            "type": "object"
+          }
+        }
+      },
+      "targets": {}
+    }
+  }
+}

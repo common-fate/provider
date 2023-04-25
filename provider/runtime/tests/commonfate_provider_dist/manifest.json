@@ -1,0 +1,7 @@
+{
+  "name": "test",
+  "version": "v1.0.0",
+  "publisher": "test-publisher",
+  "schema_version": "v1",
+  "python_package": "provider_example"
+}

@@ -1,0 +1,44 @@
+{
+  "response": {
+    "config": {
+      "api_key": "dict://api_key",
+      "api_url": "https://example.com"
+    },
+    "diagnostics": [
+      {
+        "level": "ERROR",
+        "msg": "some error happened!"
+      }
+    ],
+    "healthy": false,
+    "provider": {
+      "name": "test",
+      "publisher": "acmecorp",
+      "version": "v0.1.0"
+    },
+    "schema": {
+      "$id": "https://registry.commonfate.io/schema/acmecorp/test/v1",
+      "$schema": "https://schema.commonfate.io/provider/v1alpha1",
+      "config": {
+        "api_key": {
+          "description": "API key",
+          "secret": true,
+          "type": "string"
+        },
+        "api_url": {
+          "description": "API URL",
+          "secret": false,
+          "type": "string"
+        }
+      },
+      "meta": {
+        "framework": "0.10.0"
+      },
+      "resources": {
+        "loaders": {},
+        "types": {}
+      },
+      "targets": {}
+    }
+  }
+}
