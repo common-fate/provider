@@ -13,7 +13,7 @@ def export_schema(id: typing.Optional[v1alpha1.ID] = None) -> v1alpha1.Schema:
 
     framework_version = None
     try:
-        framework_version = get_distribution("commonfate_provider").version
+        framework_version = get_distribution("provider").version
     except Exception:
         pass
 
