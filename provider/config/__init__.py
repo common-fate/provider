@@ -3,7 +3,7 @@ import boto3
 from botocore.exceptions import ClientError
 from dataclasses import dataclass
 from provider.config import loaders
-from provider import provider
+import provider
 
 
 class ConfigError(Exception):

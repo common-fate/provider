@@ -3,7 +3,8 @@ import pytest
 from syrupy.extensions.json import JSONSnapshotExtension
 
 from provider.runtime import AWSLambdaRuntime
-from provider import namespace, provider, access, target, resources, tasks
+from provider import namespace, access, target, resources, tasks
+import provider
 from provider.tests import helper
 
 

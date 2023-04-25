@@ -1,5 +1,6 @@
 import pytest
-from provider import namespace, provider, diagnostics
+from provider import namespace
+import provider
 
 
 @pytest.fixture(autouse=True)

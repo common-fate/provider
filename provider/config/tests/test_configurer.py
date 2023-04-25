@@ -1,5 +1,6 @@
 import pytest
-from provider import namespace, provider, config
+import provider
+from provider import namespace, config
 from provider.config import loaders
 
 

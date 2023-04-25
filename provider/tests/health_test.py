@@ -1,7 +1,7 @@
 import pytest
 from syrupy.extensions.json import JSONSnapshotExtension
-
-from provider import diagnostics, namespace, provider, health
+import provider
+from provider import diagnostics, namespace, health
 
 
 @pytest.fixture(autouse=True)
