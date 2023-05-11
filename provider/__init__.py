@@ -13,11 +13,21 @@ class Field:
 
 
 class String(Field):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self._value = None
+
     def set(self, val: str) -> None:
         self._value = val
 
     def get(self) -> str:
+        if self._value is None and not self.optional:
+            raise FieldError("A required config value is not set")
         return self._value
+
+
+class FieldError(Exception):
+    pass
 
 
 class Provider(ABC):
